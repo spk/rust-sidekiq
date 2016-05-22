@@ -26,7 +26,7 @@ use std::default::Default;
 
 use rustc_serialize::json::ToJson;
 
-use sidekiq::Job;
+use sidekiq::{Job, JobOpts};
 
 fn serialized_args() -> String {
     let mut args = Vec::new();
@@ -36,7 +36,11 @@ fn serialized_args() -> String {
 }
 
 let class = "MyClass".to_string();
-let job = Job::new(class.clone(), serialized_args(), Default::default());
+let job_opts = JobOpts {
+    queue: "test".to_string(),
+    ..Default::default()
+};
+let job = Job::new(class, serialized_args(), Default::default());
 ~~~
 
 ### Client
