@@ -1,0 +1,12 @@
+[package]
+name = "sidekiq"
+version = "0.1.0"
+authors = ["Laurent Arnoud <laurent@spkdev.net>"]
+
+[dependencies]
+time = "0.1"
+rand = "0.3"
+redis = "0.5"
+rustc-serialize = "0.3"
+r2d2 = "0.6"
+r2d2_redis = "0.2"

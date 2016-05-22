@@ -1,0 +1,17 @@
+services:
+  - redis-server
+
+language: rust
+rust:
+  - nightly
+  - beta
+  - stable
+
+matrix:
+  allow_failures:
+    - rust: nightly
+    - rust: beta
+
+script:
+  - cargo build -v
+  - cargo test -v
