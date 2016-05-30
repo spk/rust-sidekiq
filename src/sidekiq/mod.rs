@@ -7,7 +7,7 @@ use rand::{Rng, thread_rng};
 use rustc_serialize::json::{ToJson, Json};
 use r2d2_redis::RedisConnectionManager;
 use r2d2::{Config, Pool, PooledConnection};
-use redis::{cmd, Commands, RedisResult, parse_redis_url};
+use redis::{pipe, RedisResult, parse_redis_url};
 
 pub type RedisPooledConnection = PooledConnection<RedisConnectionManager>;
 pub type RedisPool = Pool<RedisConnectionManager>;
@@ -93,34 +93,28 @@ impl Default for ClientOpts {
 }
 
 pub struct Client {
-    pub pool: RedisPool,
+    pub connection: RedisPooledConnection,
     pub namespace: Option<String>,
 }
 
 impl Client {
     pub fn new(pool: RedisPool, opts: ClientOpts) -> Client {
         Client {
-            pool: pool,
+            connection: pool.get().unwrap(),
             namespace: opts.namespace,
         }
     }
 
-    fn get_connection(&self) -> RedisPooledConnection {
-        self.pool.get().unwrap()
-    }
-
     pub fn push(&self, job: Job) -> RedisResult<Job> {
-        let conn = self.get_connection();
-        let _: () = cmd("SADD")
-                        .arg("queues")
-                        .arg(job.queue.to_string())
-                        .query(&*conn)
-                        .unwrap();
-        let _: () = cmd("LPUSH")
-                        .arg(self.queue_name(&job.queue))
-                        .arg(job.to_json())
-                        .query(&*conn)
-                        .unwrap();
+        let _: () = try!(pipe()
+            .atomic()
+            .cmd("SADD")
+            .arg("queues")
+            .arg(job.queue.to_string()).ignore()
+            .cmd("LPUSH")
+            .arg(self.queue_name(&job.queue))
+            .arg(job.to_json())
+            .query(&*self.connection));
         Ok(job)
     }
 
