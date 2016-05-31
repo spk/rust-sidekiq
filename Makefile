@@ -16,4 +16,4 @@ bench: ## Bench
 docs: build
 	@cargo doc --no-deps
 
-.PHONY: build test bench docs
+.PHONY: all build test bench docs help

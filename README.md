@@ -63,6 +63,12 @@ match client.push(job) {
 }
 ~~~
 
+
+## REFERENCES
+
+* <http://julienblanchard.com/2015/using-resque-with-rust/>
+* <https://github.com/d-unseductable/rust_sidekiq>
+
 ## LICENSE
 
 The MIT License
