@@ -8,4 +8,5 @@ extern crate r2d2;
 extern crate r2d2_redis;
 
 mod sidekiq;
-pub use sidekiq::{Job, JobOpts, Client, ClientOpts, RedisPool, create_redis_pool};
+pub use sidekiq::{Job, JobOpts, Client, ClientOpts, RedisPool, RedisPooledConnection,
+                  create_redis_pool};
