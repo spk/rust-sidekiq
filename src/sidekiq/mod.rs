@@ -1,8 +1,8 @@
 use std::env;
 use std::default::Default;
 use std::collections::BTreeMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use time::now_utc;
 use rand::{Rng, thread_rng};
 use rustc_serialize::json::{ToJson, Json};
 use r2d2_redis::RedisConnectionManager;
@@ -27,13 +27,13 @@ pub struct Job {
     pub retry: i64,
     pub queue: String,
     pub jid: String,
-    pub created_at: i64,
-    pub enqueued_at: i64,
+    pub created_at: u64,
+    pub enqueued_at: u64,
 }
 
 impl Default for JobOpts {
     fn default() -> JobOpts {
-        let now = now_utc().to_timespec().sec;
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u64;
         let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
         JobOpts {
             retry: 25,
@@ -49,8 +49,8 @@ pub struct JobOpts {
     pub retry: i64,
     pub queue: String,
     pub jid: String,
-    pub created_at: i64,
-    pub enqueued_at: i64,
+    pub created_at: u64,
+    pub enqueued_at: u64,
 }
 
 impl Job {

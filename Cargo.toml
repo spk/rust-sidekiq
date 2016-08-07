@@ -10,7 +10,6 @@ license = "MIT"
 readme = "README.md"
 
 [dependencies]
-time = "0.1"
 rand = "0.3"
 redis = "0.5"
 rustc-serialize = "0.3"

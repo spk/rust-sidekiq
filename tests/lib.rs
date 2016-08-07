@@ -1,10 +1,9 @@
-extern crate time;
 extern crate sidekiq;
 extern crate rustc_serialize;
 
 use std::default::Default;
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use time::now_utc;
 use rustc_serialize::json::ToJson;
 
 use sidekiq::{Job, Client, ClientOpts, create_redis_pool};
@@ -16,8 +15,8 @@ fn serialized_args() -> String {
     args.to_json().to_string()
 }
 
-fn time_ok(time: i64) -> bool {
-    let now = now_utc().to_timespec().sec;
+fn time_ok(time: u64) -> bool {
+    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u64;
     if now >= time {
         true
     } else {
