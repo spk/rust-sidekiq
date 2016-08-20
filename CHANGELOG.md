@@ -1,4 +1,10 @@
 
+0.2.0 / 2016-08-20
+==================
+
+  * Replace rustc-serialize by serde
+  * Use std::time instead of time crate
+
 0.1.3 / 2016-06-05
 ==================
 

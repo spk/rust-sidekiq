@@ -10,7 +10,7 @@
 
 ~~~
 [dependencies]
-sidekiq = "0.1"
+sidekiq = "0.2"
 ~~~
 
 ## Usage
