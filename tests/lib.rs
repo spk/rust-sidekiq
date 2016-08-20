@@ -55,6 +55,9 @@ fn test_client_push() {
     let client = Client::new(create_redis_pool(), client_opts);
     match client.push(job) {
         Ok(_) => assert!(true),
-        Err(_) => assert!(false),
+        Err(err) => {
+            println!("Sidekiq push failed: {}", err);
+            assert!(false)
+        },
     }
 }

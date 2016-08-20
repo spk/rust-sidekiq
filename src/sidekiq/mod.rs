@@ -1,6 +1,8 @@
 extern crate redis;
 
 use std::env;
+use std::fmt;
+use std::error::Error;
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -33,20 +35,45 @@ pub struct Job {
 }
 
 #[derive(Debug)]
-pub enum Error {
+pub enum ClientError {
     Redis(redis::RedisError),
     Pool(GetTimeout),
 }
 
-impl From<redis::RedisError> for Error {
-    fn from(error: redis::RedisError) -> Error {
-        Error::Redis(error)
+impl fmt::Display for ClientError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            ClientError::Redis(ref err) => err.fmt(f),
+            ClientError::Pool(ref err) => err.fmt(f),
+        }
     }
 }
 
-impl From<GetTimeout> for Error {
-    fn from(error: GetTimeout) -> Error {
-        Error::Pool(error)
+impl Error for ClientError {
+    fn description(&self) -> &str {
+        match *self {
+            ClientError::Redis(ref err) => err.description(),
+            ClientError::Pool(ref err) => err.description(),
+        }
+    }
+
+    fn cause(&self) -> Option<&Error> {
+        match *self {
+            ClientError::Redis(ref err) => Some(err),
+            ClientError::Pool(ref err) => Some(err),
+        }
+    }
+}
+
+impl From<redis::RedisError> for ClientError {
+    fn from(error: redis::RedisError) -> ClientError {
+        ClientError::Redis(error)
+    }
+}
+
+impl From<GetTimeout> for ClientError {
+    fn from(error: GetTimeout) -> ClientError {
+        ClientError::Pool(error)
     }
 }
 
@@ -125,14 +152,14 @@ impl Client {
         }
     }
 
-    fn connect(&self) -> Result<RedisPooledConnection, Error> {
+    fn connect(&self) -> Result<RedisPooledConnection, ClientError> {
         match self.redis_pool.get() {
             Ok(conn) => Ok(conn),
-            Err(err) => Err(Error::Pool(err)),
+            Err(err) => Err(ClientError::Pool(err)),
         }
     }
 
-    pub fn push(&self, job: Job) -> Result<(), Error> {
+    pub fn push(&self, job: Job) -> Result<(), ClientError> {
         match self.connect() {
             Ok(conn) => {
                 redis::pipe()
@@ -145,7 +172,7 @@ impl Client {
                     .arg(self.queue_name(&job.queue))
                     .arg(serde_json::to_string(&job).unwrap())
                     .query(&*conn)
-                    .map_err(Error::Redis)
+                    .map_err(ClientError::Redis)
             }
             Err(err) => Err(err),
         }
