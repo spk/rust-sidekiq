@@ -1,18 +1,25 @@
 extern crate sidekiq;
-extern crate rustc_serialize;
+extern crate serde_json;
 
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use rustc_serialize::json::ToJson;
-
 use sidekiq::{Job, Client, ClientOpts, create_redis_pool};
+use serde_json::value::Value;
+use serde_json::builder::{ArrayBuilder, ObjectBuilder};
 
-fn serialized_args() -> String {
-    let mut args = Vec::new();
-    args.push("arg1".to_json());
-    args.push("arg2".to_json());
-    args.to_json().to_string()
+fn args() -> Vec<Value> {
+    let arg_str: Value = Value::String("arg".to_string());
+    let arg_int: Value = Value::I64(42);
+    let arg_bool: Value = Value::Bool(true);
+    let arg_object = ObjectBuilder::new()
+        .insert("class".to_string(), "Ruby")
+        .build();
+    let arg_array = ArrayBuilder::new()
+        .push(1.2)
+        .build();
+    let args: Vec<Value> = vec![arg_str, arg_int, arg_bool, arg_object, arg_array];
+    args
 }
 
 fn time_ok(time: u64) -> bool {
@@ -27,12 +34,11 @@ fn time_ok(time: u64) -> bool {
 #[test]
 fn test_job_format_with_default() {
     let class = "MyClass".to_string();
-    let job = Job::new(class.clone(), serialized_args(), Default::default());
+    let job = Job::new(class.clone(), args(), Default::default());
     assert_eq!(job.class, class);
     assert_eq!(job.retry, 25);
     assert_eq!(job.jid.len(), 24);
     assert_eq!(job.queue, "default".to_string());
-    assert_eq!(job.args, serialized_args());
     assert!(time_ok(job.created_at));
     assert!(time_ok(job.enqueued_at));
 }
@@ -40,7 +46,7 @@ fn test_job_format_with_default() {
 #[test]
 fn test_client_push() {
     let class = "MyClass".to_string();
-    let job = Job::new(class.clone(), serialized_args(), Default::default());
+    let job = Job::new(class.clone(), args(), Default::default());
     let ns = "test";
     let client_opts = ClientOpts {
         namespace: Some(ns.to_string()),

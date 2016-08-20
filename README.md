@@ -18,21 +18,28 @@ sidekiq = "0.1"
 
 ### Job
 
-~~~ rust
+``` rust
 extern crate sidekiq;
-extern crate rustc_serialize;
 
 use std::default::Default;
 
-use rustc_serialize::json::ToJson;
-
 use sidekiq::{Job, JobOpts};
 
-fn serialized_args() -> String {
-    let mut args = Vec::new();
-    args.push("arg1".to_json());
-    args.push("arg2".to_json());
-    args.to_json().to_string()
+use serde_json::value::Value;
+use serde_json::builder::{ArrayBuilder, ObjectBuilder};
+
+fn args() -> Vec<Value> {
+    let arg_str: Value = Value::String("arg".to_string());
+    let arg_int: Value = Value::I64(42);
+    let arg_bool: Value = Value::Bool(true);
+    let arg_object = ObjectBuilder::new()
+        .insert("class".to_string(), "Ruby")
+        .build();
+    let arg_array = ArrayBuilder::new()
+        .push(1.2)
+        .build();
+    let args: Vec<Value> = vec![arg_str, arg_int, arg_bool, arg_object, arg_array];
+    args
 }
 
 let class = "MyClass".to_string();
@@ -40,12 +47,12 @@ let job_opts = JobOpts {
     queue: "test".to_string(),
     ..Default::default()
 };
-let job = Job::new(class, serialized_args(), Default::default());
-~~~
+let job = Job::new(class, args(), Default::default());
+```
 
 ### Client
 
-~~~ rust
+``` rust
 extern crate sidekiq;
 use std::default::Default;
 
@@ -61,7 +68,7 @@ match client.push(job) {
     Ok(_) => assert!(true),
     Err(_) => assert!(false),
 }
-~~~
+```
 
 
 ## REFERENCES

@@ -1,10 +1,11 @@
 use std::env;
 use std::default::Default;
-use std::collections::BTreeMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rand::{Rng, thread_rng};
-use rustc_serialize::json::{ToJson, Json};
+use serde::{Serialize, Serializer};
+use serde_json;
+use serde_json::Value;
 use r2d2_redis::RedisConnectionManager;
 use r2d2::{Config, Pool, PooledConnection};
 use redis::{pipe, RedisResult, parse_redis_url};
@@ -20,10 +21,9 @@ pub fn create_redis_pool() -> RedisPool {
     Pool::new(config, manager).unwrap()
 }
 
-#[derive(RustcEncodable, RustcDecodable, Debug)]
 pub struct Job {
     pub class: String,
-    pub args: String,
+    pub args: Vec<Value>,
     pub retry: i64,
     pub queue: String,
     pub jid: String,
@@ -54,7 +54,7 @@ pub struct JobOpts {
 }
 
 impl Job {
-    pub fn new(class: String, args: String, opts: JobOpts) -> Job {
+    pub fn new(class: String, args: Vec<Value>, opts: JobOpts) -> Job {
         Job {
             class: class,
             args: args,
@@ -67,18 +67,19 @@ impl Job {
     }
 }
 
-impl ToJson for Job {
-    fn to_json(&self) -> Json {
-        let mut object = BTreeMap::new();
-        object.insert("class".to_string(), self.class.to_json());
-        // `args` are already serialized, creating Json struct from it.
-        object.insert("args".to_string(), Json::from_str(&self.args).unwrap());
-        object.insert("retry".to_string(), self.retry.to_json());
-        object.insert("queue".to_string(), self.queue.to_json());
-        object.insert("jid".to_string(), self.jid.to_json());
-        object.insert("created_at".to_string(), self.created_at.to_json());
-        object.insert("enqueued_at".to_string(), self.enqueued_at.to_json());
-        Json::Object(object)
+impl Serialize for Job {
+    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        where S: Serializer
+    {
+        let mut state = try!(serializer.serialize_struct("Job", 7));
+        try!(serializer.serialize_struct_elt(&mut state, "class", &self.class));
+        try!(serializer.serialize_struct_elt(&mut state, "args", &self.args));
+        try!(serializer.serialize_struct_elt(&mut state, "retry", &self.retry));
+        try!(serializer.serialize_struct_elt(&mut state, "queue", &self.queue));
+        try!(serializer.serialize_struct_elt(&mut state, "jid", &self.jid));
+        try!(serializer.serialize_struct_elt(&mut state, "created_at", &self.created_at));
+        try!(serializer.serialize_struct_elt(&mut state, "enqueued_at", &self.enqueued_at));
+        serializer.serialize_struct_end(state)
     }
 }
 
@@ -114,7 +115,7 @@ impl Client {
             .ignore()
             .cmd("LPUSH")
             .arg(self.queue_name(&job.queue))
-            .arg(job.to_json())
+            .arg(serde_json::to_string(&job).unwrap())
             .query(&*self.connection));
         Ok(job)
     }

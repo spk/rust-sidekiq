@@ -1,7 +1,8 @@
 #![crate_name = "sidekiq"]
 
 extern crate redis;
-extern crate rustc_serialize;
+extern crate serde;
+extern crate serde_json;
 extern crate rand;
 extern crate r2d2;
 extern crate r2d2_redis;
