@@ -4,14 +4,16 @@
 
 ## Dependencies
 
-* Redis
+* [redis](https://github.com/mitsuhiko/redis-rs)
+* [r2d2-redis](https://github.com/sorccu/r2d2-redis)
+* [serde_json](https://github.com/serde-rs/json)
 
 ## Installation
 
-~~~
+``` ini
 [dependencies]
 sidekiq = "0.2"
-~~~
+```
 
 ## Usage
 
@@ -65,11 +67,10 @@ let client_opts = ClientOpts {
 };
 let client = Client::new(create_redis_pool(), client_opts);
 match client.push(job) {
-    Ok(_) => assert!(true),
-    Err(_) => assert!(false),
+    Ok(_) => true,
+    Err(_) => false,
 }
 ```
-
 
 ## REFERENCES
 
