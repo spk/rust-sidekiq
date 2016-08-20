@@ -67,8 +67,10 @@ let client_opts = ClientOpts {
 };
 let client = Client::new(create_redis_pool(), client_opts);
 match client.push(job) {
-    Ok(_) => true,
-    Err(_) => false,
+    Ok(_) => {},
+    Err(err) => {
+        println!("Sidekiq push failed: {}", err);
+    },
 }
 ```
 
