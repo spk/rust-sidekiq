@@ -1,3 +1,5 @@
+extern crate redis;
+
 use std::env;
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -7,8 +9,7 @@ use serde::{Serialize, Serializer};
 use serde_json;
 use serde_json::Value;
 use r2d2_redis::RedisConnectionManager;
-use r2d2::{Config, Pool, PooledConnection};
-use redis::{pipe, RedisResult, parse_redis_url};
+use r2d2::{Config, Pool, PooledConnection, GetTimeout};
 
 pub type RedisPooledConnection = PooledConnection<RedisConnectionManager>;
 pub type RedisPool = Pool<RedisConnectionManager>;
@@ -16,7 +17,7 @@ pub type RedisPool = Pool<RedisConnectionManager>;
 pub fn create_redis_pool() -> RedisPool {
     let config = Config::builder().build();
     let redis_url = &env::var("REDIS_URL").unwrap_or("redis://127.0.0.1/".to_owned());
-    let url = parse_redis_url(redis_url).unwrap();
+    let url = redis::parse_redis_url(redis_url).unwrap();
     let manager = RedisConnectionManager::new(url).unwrap();
     Pool::new(config, manager).unwrap()
 }
@@ -29,6 +30,24 @@ pub struct Job {
     pub jid: String,
     pub created_at: u64,
     pub enqueued_at: u64,
+}
+
+#[derive(Debug)]
+pub enum Error {
+    Redis(redis::RedisError),
+    Pool(GetTimeout),
+}
+
+impl From<redis::RedisError> for Error {
+    fn from(error: redis::RedisError) -> Error {
+        Error::Redis(error)
+    }
+}
+
+impl From<GetTimeout> for Error {
+    fn from(error: GetTimeout) -> Error {
+        Error::Pool(error)
+    }
 }
 
 impl Default for JobOpts {
@@ -94,30 +113,42 @@ impl Default for ClientOpts {
 }
 
 pub struct Client {
-    pub connection: RedisPooledConnection,
+    pub redis_pool: RedisPool,
     pub namespace: Option<String>,
 }
 
 impl Client {
-    pub fn new(pool: RedisPool, opts: ClientOpts) -> Client {
+    pub fn new(redis_pool: RedisPool, opts: ClientOpts) -> Client {
         Client {
-            connection: pool.get().unwrap(),
+            redis_pool: redis_pool,
             namespace: opts.namespace,
         }
     }
 
-    pub fn push(&self, job: Job) -> RedisResult<Job> {
-        let _: () = try!(pipe()
-            .atomic()
-            .cmd("SADD")
-            .arg("queues")
-            .arg(job.queue.to_string())
-            .ignore()
-            .cmd("LPUSH")
-            .arg(self.queue_name(&job.queue))
-            .arg(serde_json::to_string(&job).unwrap())
-            .query(&*self.connection));
-        Ok(job)
+    fn connect(&self) -> Result<RedisPooledConnection, Error> {
+        match self.redis_pool.get() {
+            Ok(conn) => Ok(conn),
+            Err(err) => Err(Error::Pool(err)),
+        }
+    }
+
+    pub fn push(&self, job: Job) -> Result<(), Error> {
+        match self.connect() {
+            Ok(conn) => {
+                redis::pipe()
+                    .atomic()
+                    .cmd("SADD")
+                    .arg("queues")
+                    .arg(job.queue.to_string())
+                    .ignore()
+                    .cmd("LPUSH")
+                    .arg(self.queue_name(&job.queue))
+                    .arg(serde_json::to_string(&job).unwrap())
+                    .query(&*conn)
+                    .map_err(Error::Redis)
+            }
+            Err(err) => Err(err),
+        }
     }
 
     fn queue_name(&self, queue: &str) -> String {
