@@ -79,7 +79,10 @@ impl From<GetTimeout> for ClientError {
 
 impl Default for JobOpts {
     fn default() -> JobOpts {
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u64;
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as u64;
         let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
         JobOpts {
             retry: 25,
