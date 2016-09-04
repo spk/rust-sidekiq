@@ -65,7 +65,8 @@ let client_opts = ClientOpts {
     namespace: Some(ns.to_string()),
     ..Default::default()
 };
-let client = Client::new(create_redis_pool(), client_opts);
+let pool = create_redis_pool().unwrap();
+let client = Client::new(pool, client_opts);
 match client.push(job) {
     Ok(_) => {},
     Err(err) => {
