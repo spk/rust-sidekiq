@@ -75,6 +75,10 @@ match client.push(job) {
 }
 ```
 
+## Default environment variables
+
+* REDIS_URL="redis://127.0.0.1/"
+
 ## REFERENCES
 
 * <http://julienblanchard.com/2015/using-resque-with-rust/>
