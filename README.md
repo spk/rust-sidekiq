@@ -15,9 +15,6 @@
 sidekiq = "0.2"
 ```
 
-## Documentation
-
-
 ## Usage
 
 ### Job
