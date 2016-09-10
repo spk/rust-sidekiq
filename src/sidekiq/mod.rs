@@ -17,18 +17,23 @@ pub type RedisPooledConnection = PooledConnection<RedisConnectionManager>;
 pub type RedisPool = Pool<RedisConnectionManager>;
 
 #[derive(Debug)]
-pub enum ClientError {
+pub struct ClientError {
+    kind: ErrorKind,
+}
+
+#[derive(Debug)]
+enum ErrorKind {
     Redis(redis::RedisError),
     PoolTimeout(GetTimeout),
     PoolInit(InitializationError),
 }
 
-pub fn create_redis_pool() -> Result<RedisPool, ClientError>  {
+pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
     let config = Config::builder().build();
     let redis_url = &env::var("REDIS_URL").unwrap_or("redis://127.0.0.1/".to_owned());
     let url = redis::parse_redis_url(redis_url).unwrap();
     let manager = RedisConnectionManager::new(url).unwrap();
-    Pool::new(config, manager).map_err(ClientError::PoolInit)
+    Pool::new(config, manager).map_err(|err| ClientError { kind: ErrorKind::PoolInit(err) })
 }
 
 pub struct Job {
@@ -43,47 +48,47 @@ pub struct Job {
 
 impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            ClientError::Redis(ref err) => err.fmt(f),
-            ClientError::PoolTimeout(ref err) => err.fmt(f),
-            ClientError::PoolInit(ref err) => err.fmt(f),
+        match self.kind {
+            ErrorKind::Redis(ref err) => err.fmt(f),
+            ErrorKind::PoolTimeout(ref err) => err.fmt(f),
+            ErrorKind::PoolInit(ref err) => err.fmt(f),
         }
     }
 }
 
 impl Error for ClientError {
     fn description(&self) -> &str {
-        match *self {
-            ClientError::Redis(ref err) => err.description(),
-            ClientError::PoolTimeout(ref err) => err.description(),
-            ClientError::PoolInit(ref err) => err.description(),
+        match self.kind {
+            ErrorKind::Redis(ref err) => err.description(),
+            ErrorKind::PoolTimeout(ref err) => err.description(),
+            ErrorKind::PoolInit(ref err) => err.description(),
         }
     }
 
     fn cause(&self) -> Option<&Error> {
-        match *self {
-            ClientError::Redis(ref err) => Some(err),
-            ClientError::PoolTimeout(ref err) => Some(err),
-            ClientError::PoolInit(ref err) => Some(err),
+        match self.kind {
+            ErrorKind::Redis(ref err) => Some(err),
+            ErrorKind::PoolTimeout(ref err) => Some(err),
+            ErrorKind::PoolInit(ref err) => Some(err),
         }
     }
 }
 
 impl From<redis::RedisError> for ClientError {
     fn from(error: redis::RedisError) -> ClientError {
-        ClientError::Redis(error)
+        ClientError { kind: ErrorKind::Redis(error) }
     }
 }
 
 impl From<GetTimeout> for ClientError {
     fn from(error: GetTimeout) -> ClientError {
-        ClientError::PoolTimeout(error)
+        ClientError { kind: ErrorKind::PoolTimeout(error) }
     }
 }
 
 impl From<InitializationError> for ClientError {
     fn from(error: InitializationError) -> ClientError {
-        ClientError::PoolInit(error)
+        ClientError { kind: ErrorKind::PoolInit(error) }
     }
 }
 
@@ -168,7 +173,7 @@ impl Client {
     fn connect(&self) -> Result<RedisPooledConnection, ClientError> {
         match self.redis_pool.get() {
             Ok(conn) => Ok(conn),
-            Err(err) => Err(ClientError::PoolTimeout(err)),
+            Err(err) => Err(ClientError { kind: ErrorKind::PoolTimeout(err) }),
         }
     }
 
@@ -185,7 +190,7 @@ impl Client {
                     .arg(self.queue_name(&job.queue))
                     .arg(serde_json::to_string(&job).unwrap())
                     .query(&*conn)
-                    .map_err(ClientError::Redis)
+                    .map_err(|err| ClientError { kind: ErrorKind::Redis(err) })
             }
             Err(err) => Err(err),
         }
