@@ -12,7 +12,7 @@
 
 ``` ini
 [dependencies]
-sidekiq = "0.2"
+sidekiq = "0.3"
 ```
 
 ## Usage

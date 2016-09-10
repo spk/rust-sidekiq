@@ -1,4 +1,10 @@
 
+0.3.0 / 2016-09-10
+==================
+
+  * Use opaque struct for ClientError
+  * Better error handling for create_redis_pool fn
+
 0.2.2 / 2016-08-20
 ==================
 
