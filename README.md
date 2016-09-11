@@ -10,7 +10,7 @@
 
 ## Installation
 
-``` ini
+``` toml
 [dependencies]
 sidekiq = "0.3"
 ```
