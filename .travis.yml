@@ -13,5 +13,9 @@ matrix:
     - rust: beta
 
 script:
-  - make build
-  - make test
+  - cargo test -v
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
