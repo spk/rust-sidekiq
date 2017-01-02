@@ -1,4 +1,10 @@
 
+0.4.0 / 2017-01-02
+==================
+
+  * Merge pull request #1 from @ttdonovan feature/push-bulk
+    * pub fn push_bulk Client
+
 0.3.0 / 2016-09-10
 ==================
 
