@@ -2,6 +2,7 @@ services:
   - redis-server
 
 language: rust
+cache: cargo
 rust:
   - nightly
   - beta
