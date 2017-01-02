@@ -187,7 +187,8 @@ impl Client {
 
     fn raw_push(&self, payloads: Vec<Job>) -> Result<(), ClientError> {
         let ref p = payloads[0];
-        let to_push = payloads.iter().map(|entry| serde_json::to_string(&entry).unwrap()).collect::<Vec<_>>();
+        let to_push =
+            payloads.iter().map(|entry| serde_json::to_string(&entry).unwrap()).collect::<Vec<_>>();
         match self.connect() {
             Ok(conn) => {
                 redis::pipe()
