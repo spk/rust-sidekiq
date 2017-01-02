@@ -178,17 +178,27 @@ impl Client {
     }
 
     pub fn push(&self, job: Job) -> Result<(), ClientError> {
+        self.raw_push(vec![job])
+    }
+
+    pub fn push_bulk(&self, jobs: Vec<Job>) -> Result<(), ClientError> {
+        self.raw_push(jobs)
+    }
+
+    fn raw_push(&self, payloads: Vec<Job>) -> Result<(), ClientError> {
+        let ref p = payloads[0];
+        let to_push = payloads.iter().map(|entry| serde_json::to_string(&entry).unwrap()).collect::<Vec<_>>();
         match self.connect() {
             Ok(conn) => {
                 redis::pipe()
                     .atomic()
                     .cmd("SADD")
                     .arg("queues")
-                    .arg(job.queue.to_string())
+                    .arg(p.queue.to_string())
                     .ignore()
                     .cmd("LPUSH")
-                    .arg(self.queue_name(&job.queue))
-                    .arg(serde_json::to_string(&job).unwrap())
+                    .arg(self.queue_name(&p.queue))
+                    .arg(to_push)
                     .query(&*conn)
                     .map_err(|err| ClientError { kind: ErrorKind::Redis(err) })
             }
