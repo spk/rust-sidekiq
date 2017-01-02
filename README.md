@@ -87,7 +87,7 @@ match client.push(job) {
 
 The MIT License
 
-Copyright (c) 2016 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis-ci/spk/rust-sidekiq.svg)](https://travis-ci.org/spk/rust-sidekiq)
