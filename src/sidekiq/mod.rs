@@ -8,6 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use rand::{Rng, thread_rng};
 use serde::{Serialize, Serializer};
+use serde::ser::SerializeStruct;
 use serde_json;
 use serde_json::Value;
 use r2d2_redis::RedisConnectionManager;
@@ -132,18 +133,18 @@ impl Job {
 }
 
 impl Serialize for Job {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where S: Serializer
     {
-        let mut state = try!(serializer.serialize_struct("Job", 7));
-        try!(serializer.serialize_struct_elt(&mut state, "class", &self.class));
-        try!(serializer.serialize_struct_elt(&mut state, "args", &self.args));
-        try!(serializer.serialize_struct_elt(&mut state, "retry", &self.retry));
-        try!(serializer.serialize_struct_elt(&mut state, "queue", &self.queue));
-        try!(serializer.serialize_struct_elt(&mut state, "jid", &self.jid));
-        try!(serializer.serialize_struct_elt(&mut state, "created_at", &self.created_at));
-        try!(serializer.serialize_struct_elt(&mut state, "enqueued_at", &self.enqueued_at));
-        serializer.serialize_struct_end(state)
+        let mut s = try!(serializer.serialize_struct("Job", 7));
+        try!(s.serialize_field("class", &self.class));
+        try!(s.serialize_field("args", &self.args));
+        try!(s.serialize_field("retry", &self.retry));
+        try!(s.serialize_field("queue", &self.queue));
+        try!(s.serialize_field("jid", &self.jid));
+        try!(s.serialize_field("created_at", &self.created_at));
+        try!(s.serialize_field("enqueued_at", &self.enqueued_at));
+        s.end()
     }
 }
 

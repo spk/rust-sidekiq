@@ -1,24 +1,25 @@
 extern crate sidekiq;
+#[macro_use]
 extern crate serde_json;
 
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use sidekiq::{Job, Client, ClientOpts, create_redis_pool};
 use serde_json::value::Value;
-use serde_json::builder::{ArrayBuilder, ObjectBuilder};
+use sidekiq::{Job, Client, ClientOpts, create_redis_pool};
 
 fn args() -> Vec<Value> {
-    let arg_str: Value = Value::String("arg".to_string());
-    let arg_int: Value = Value::I64(42);
-    let arg_bool: Value = Value::Bool(true);
-    let arg_object = ObjectBuilder::new()
-        .insert("class".to_string(), "Ruby")
-        .build();
-    let arg_array = ArrayBuilder::new()
-        .push(1.2)
-        .build();
-    let args: Vec<Value> = vec![arg_str, arg_int, arg_bool, arg_object, arg_array];
+    let value = json!({
+        "code": 200,
+        "success": true,
+        "payload": {
+            "features": [
+                "serde",
+                "json"
+            ]
+        }
+    });
+    let args: Vec<Value> = vec![value];
     args
 }
 
