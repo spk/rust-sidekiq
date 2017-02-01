@@ -1,6 +1,6 @@
 [package]
 name = "sidekiq"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Laurent Arnoud <laurent@spkdev.net>"]
 description = "Rust Sidekiq Client"
 repository = "https://github.com/spk/rust-sidekiq.git"

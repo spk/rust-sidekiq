@@ -12,7 +12,7 @@
 
 ``` toml
 [dependencies]
-sidekiq = "0.4"
+sidekiq = "0.5"
 ```
 
 ## Usage
