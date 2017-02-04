@@ -6,11 +6,11 @@ use std::error::Error;
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use Value;
 use rand::{Rng, thread_rng};
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 use serde_json;
-use serde_json::Value;
 use r2d2_redis::RedisConnectionManager;
 use r2d2::{Config, Pool, PooledConnection, GetTimeout, InitializationError};
 
@@ -118,6 +118,21 @@ pub struct JobOpts {
     pub enqueued_at: u64,
 }
 
+/// # Examples
+///
+/// ```
+/// use std::default::Default;
+/// use sidekiq::Value;
+/// use sidekiq::{Job, JobOpts};
+///
+/// // Create a job
+/// let class = "MyClass".to_string();
+/// let job_opts = JobOpts {
+///     queue: "test".to_string(),
+///     ..Default::default()
+/// };
+/// let job = Job::new(class, vec![sidekiq::Value::Null], job_opts);
+/// ```
 impl Job {
     pub fn new(class: String, args: Vec<Value>, opts: JobOpts) -> Job {
         Job {
@@ -163,6 +178,29 @@ pub struct Client {
     pub namespace: Option<String>,
 }
 
+/// # Examples
+///
+/// ```
+///
+/// use sidekiq::{Job, Value};
+/// use sidekiq::{Client, ClientOpts, create_redis_pool};
+///
+/// let ns = "test";
+/// let client_opts = ClientOpts {
+///     namespace: Some(ns.to_string()),
+///     ..Default::default()
+/// };
+/// let pool = create_redis_pool().unwrap();
+/// let client = Client::new(pool, client_opts);
+/// let class = "MyClass".to_string();
+/// let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
+/// match client.push(job) {
+///     Ok(_) => {},
+///     Err(err) => {
+///         println!("Sidekiq push failed: {}", err);
+///     },
+/// }
+/// ```
 impl Client {
     pub fn new(redis_pool: RedisPool, opts: ClientOpts) -> Client {
         Client {
