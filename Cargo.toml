@@ -9,6 +9,9 @@ keywords = ["sidekiq", "client"]
 license = "MIT"
 readme = "README.md"
 
+[badges]
+travis-ci = { repository = "spk/rust-sidekiq" }
+
 [dependencies]
 rand = "0.3"
 redis = "0.6"
