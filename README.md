@@ -14,7 +14,7 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 ``` toml
 [dependencies]
-sidekiq = "0.5"
+sidekiq = "0.6"
 ```
 
 ## Default environment variables
