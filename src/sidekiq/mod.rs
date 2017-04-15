@@ -32,7 +32,7 @@ enum ErrorKind {
 
 pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
     let config = Config::builder().build();
-    let redis_url = &env::var("REDIS_URL").unwrap_or(REDIS_URL_DEFAULT.to_owned());
+    let redis_url = &env::var("REDIS_URL").unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
     let url = redis::parse_redis_url(redis_url).unwrap();
     let manager = RedisConnectionManager::new(url).unwrap();
     Pool::new(config, manager).map_err(|err| ClientError { kind: ErrorKind::PoolInit(err) })
