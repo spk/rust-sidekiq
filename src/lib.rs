@@ -8,6 +8,9 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 * REDIS_URL="redis://127.0.0.1/"
 */
+#![deny(warnings)]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
 
 #![crate_name = "sidekiq"]
 

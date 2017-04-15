@@ -19,3 +19,8 @@ serde = "0.9.0"
 serde_json = "0.9.0"
 r2d2 = "0.7.0"
 r2d2_redis = "0.6.0"
+clippy = { version = "=0.0.122", optional = true }
+
+[features]
+unstable = []
+lint = ["clippy"]
