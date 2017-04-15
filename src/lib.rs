@@ -6,7 +6,7 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 # Default environment variables
 
-* REDIS_URL="redis://127.0.0.1/"
+* `REDIS_URL`="redis://127.0.0.1/"
 */
 #![deny(warnings)]
 #![cfg_attr(feature = "clippy", feature(plugin))]
