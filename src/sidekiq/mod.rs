@@ -226,7 +226,7 @@ impl Client {
     }
 
     fn raw_push(&self, payloads: Vec<Job>) -> Result<(), ClientError> {
-        let ref p = payloads[0];
+        let payload = &payloads[0];
         let to_push =
             payloads.iter().map(|entry| serde_json::to_string(&entry).unwrap()).collect::<Vec<_>>();
         match self.connect() {
@@ -235,10 +235,10 @@ impl Client {
                     .atomic()
                     .cmd("SADD")
                     .arg("queues")
-                    .arg(p.queue.to_string())
+                    .arg(payload.queue.to_string())
                     .ignore()
                     .cmd("LPUSH")
-                    .arg(self.queue_name(&p.queue))
+                    .arg(self.queue_name(&payload.queue))
                     .arg(to_push)
                     .query(&*conn)
                     .map_err(|err| ClientError { kind: ErrorKind::Redis(err) })
