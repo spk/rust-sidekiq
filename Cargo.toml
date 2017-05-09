@@ -1,5 +1,6 @@
 [package]
 name = "sidekiq"
+# When updating version, also modify html_root_url in the src/lib.rs file.
 version = "0.6.0"
 authors = ["Laurent Arnoud <laurent@spkdev.net>"]
 description = "Rust Sidekiq Client"
