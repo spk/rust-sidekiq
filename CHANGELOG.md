@@ -1,4 +1,19 @@
 
+0.7.0 / 2017-06-12
+==================
+
+  * Always use last clippy version
+  * Update serde to 1.0
+  * Add the `html_root_url` attribute to the crate
+  * Less strict deps
+  * Add REDIS_URL_ENV const
+  * Add clippy check
+
+0.6.0 / 2017-02-08
+==================
+
+  * Update redis and r2d2_redis
+
 0.5.0 / 2017-02-01
 ==================
 
