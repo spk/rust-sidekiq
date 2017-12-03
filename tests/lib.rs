@@ -34,12 +34,11 @@ fn get_client() -> Client {
 }
 
 fn time_ok(time: u64) -> bool {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u64;
-    if now >= time {
-        true
-    } else {
-        false
-    }
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as u64;
+    if now >= time { true } else { false }
 }
 
 #[test]
@@ -64,14 +63,14 @@ fn test_client_push() {
         Err(err) => {
             println!("Sidekiq push failed: {}", err);
             assert!(false)
-        },
+        }
     }
 }
 
 #[test]
 fn test_client_push_bulk() {
     let class = "MyClass".to_string();
-    let jobs = vec![
+    let jobs = &vec![
         Job::new(class.clone(), args(), Default::default()),
         Job::new(class.clone(), args(), Default::default())
     ];
@@ -81,6 +80,6 @@ fn test_client_push_bulk() {
         Err(err) => {
             println!("Sidekiq push failed: {}", err);
             assert!(false)
-        },
+        }
     };
 }
