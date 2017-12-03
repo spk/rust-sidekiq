@@ -34,7 +34,7 @@ The MIT License
 Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
 
 ---
-[![Build](https://img.shields.io/travis-ci/spk/rust-sidekiq.svg)](https://travis-ci.org/spk/rust-sidekiq)
+[![Build](https://img.shields.io/travis-ci/spk/rust-sidekiq/master.svg)](https://travis-ci.org/spk/rust-sidekiq)
 [![Version](https://img.shields.io/crates/v/sidekiq.svg)](https://crates.io/crates/sidekiq)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/sidekiq/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
