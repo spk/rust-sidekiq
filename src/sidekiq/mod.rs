@@ -14,8 +14,8 @@ use serde_json;
 use r2d2_redis::RedisConnectionManager;
 use r2d2::{Config, Pool, PooledConnection, GetTimeout, InitializationError};
 
-const REDIS_URL_ENV: &'static str = "REDIS_URL";
-const REDIS_URL_DEFAULT: &'static str = "redis://127.0.0.1/";
+const REDIS_URL_ENV: &str = "REDIS_URL";
+const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
 pub type RedisPooledConnection = PooledConnection<RedisConnectionManager>;
 pub type RedisPool = Pool<RedisConnectionManager>;
 
