@@ -1,4 +1,14 @@
 
+0.8.0 / 2018-01-21
+==================
+
+  * Fix fmt
+  * Update r2d2 and r2d2_redis
+  * Fix clippy warnings and rust fmt
+  * README: use master as ci badge
+  * Fix clippy warnings
+  * Add code formatting check
+
 0.7.0 / 2017-06-12
 ==================
 
