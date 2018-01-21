@@ -1,12 +1,12 @@
-extern crate sidekiq;
 #[macro_use]
 extern crate serde_json;
+extern crate sidekiq;
 
 use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::value::Value;
-use sidekiq::{Job, Client, ClientOpts, create_redis_pool};
+use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
 
 fn args() -> Vec<Value> {
     let value = json!({
@@ -38,7 +38,11 @@ fn time_ok(time: u64) -> bool {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs() as u64;
-    if now >= time { true } else { false }
+    if now >= time {
+        true
+    } else {
+        false
+    }
 }
 
 #[test]
@@ -72,7 +76,7 @@ fn test_client_push_bulk() {
     let class = "MyClass".to_string();
     let jobs = &vec![
         Job::new(class.clone(), args(), Default::default()),
-        Job::new(class.clone(), args(), Default::default())
+        Job::new(class.clone(), args(), Default::default()),
     ];
     let client = get_client();
     match client.push_bulk(jobs) {

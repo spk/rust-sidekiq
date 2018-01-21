@@ -7,7 +7,7 @@ use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use Value;
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 use serde_json;
@@ -36,7 +36,9 @@ pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
         &env::var(&REDIS_URL_ENV.to_owned()).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
     let url = redis::parse_redis_url(redis_url).unwrap();
     let manager = RedisConnectionManager::new(url).unwrap();
-    Pool::new(manager).map_err(|err| ClientError { kind: ErrorKind::PoolInit(err) })
+    Pool::new(manager).map_err(|err| ClientError {
+        kind: ErrorKind::PoolInit(err),
+    })
 }
 
 pub struct Job {
@@ -76,13 +78,17 @@ impl Error for ClientError {
 
 impl From<redis::RedisError> for ClientError {
     fn from(error: redis::RedisError) -> ClientError {
-        ClientError { kind: ErrorKind::Redis(error) }
+        ClientError {
+            kind: ErrorKind::Redis(error),
+        }
     }
 }
 
 impl From<PoolError> for ClientError {
     fn from(error: PoolError) -> ClientError {
-        ClientError { kind: ErrorKind::PoolInit(error) }
+        ClientError {
+            kind: ErrorKind::PoolInit(error),
+        }
     }
 }
 
@@ -206,7 +212,9 @@ impl Client {
     fn connect(&self) -> Result<RedisPooledConnection, ClientError> {
         match self.redis_pool.get() {
             Ok(conn) => Ok(conn),
-            Err(err) => Err(ClientError { kind: ErrorKind::PoolInit(err) }),
+            Err(err) => Err(ClientError {
+                kind: ErrorKind::PoolInit(err),
+            }),
         }
     }
 
@@ -225,19 +233,19 @@ impl Client {
             .map(|entry| serde_json::to_string(&entry).unwrap())
             .collect::<Vec<_>>();
         match self.connect() {
-            Ok(conn) => {
-                redis::pipe()
-                    .atomic()
-                    .cmd("SADD")
-                    .arg("queues")
-                    .arg(payload.queue.to_string())
-                    .ignore()
-                    .cmd("LPUSH")
-                    .arg(self.queue_name(&payload.queue))
-                    .arg(to_push)
-                    .query(&*conn)
-                    .map_err(|err| ClientError { kind: ErrorKind::Redis(err) })
-            }
+            Ok(conn) => redis::pipe()
+                .atomic()
+                .cmd("SADD")
+                .arg("queues")
+                .arg(payload.queue.to_string())
+                .ignore()
+                .cmd("LPUSH")
+                .arg(self.queue_name(&payload.queue))
+                .arg(to_push)
+                .query(&*conn)
+                .map_err(|err| ClientError {
+                    kind: ErrorKind::Redis(err),
+                }),
             Err(err) => Err(err),
         }
     }
