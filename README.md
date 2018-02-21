@@ -31,7 +31,7 @@ sidekiq = "0.8"
 
 The MIT License
 
-Copyright (c) 2016-2017 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2018 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis-ci/spk/rust-sidekiq/master.svg)](https://travis-ci.org/spk/rust-sidekiq)
