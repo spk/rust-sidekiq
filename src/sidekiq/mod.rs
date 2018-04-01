@@ -102,7 +102,7 @@ impl Default for JobOpts {
         JobOpts {
             retry: 25,
             queue: "default".to_string(),
-            jid: jid,
+            jid,
             created_at: now,
             enqueued_at: now,
         }
@@ -135,8 +135,8 @@ pub struct JobOpts {
 impl Job {
     pub fn new(class: String, args: Vec<Value>, opts: JobOpts) -> Job {
         Job {
-            class: class,
-            args: args,
+            class,
+            args,
             retry: opts.retry,
             queue: opts.queue,
             jid: opts.jid,
@@ -204,7 +204,7 @@ pub struct Client {
 impl Client {
     pub fn new(redis_pool: RedisPool, opts: ClientOpts) -> Client {
         Client {
-            redis_pool: redis_pool,
+            redis_pool,
             namespace: opts.namespace,
         }
     }
