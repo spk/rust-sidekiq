@@ -2,8 +2,8 @@
 extern crate sidekiq;
 extern crate test;
 
-use test::Bencher;
 use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
+use test::Bencher;
 
 fn get_client() -> Client {
     let ns = "test";
