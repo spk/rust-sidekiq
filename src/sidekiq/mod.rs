@@ -8,6 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use Value;
 use rand::{thread_rng, Rng};
+use rand::distributions::Alphanumeric;
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 use serde_json;
@@ -98,7 +99,7 @@ impl Default for JobOpts {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs() as u64;
-        let jid = thread_rng().gen_ascii_chars().take(24).collect::<String>();
+        let jid = thread_rng().sample_iter(&Alphanumeric).take(24).collect::<String>();
         JobOpts {
             retry: 25,
             queue: "default".to_string(),
