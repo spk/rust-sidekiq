@@ -6,7 +6,7 @@
 //!
 //! `REDIS_URL`="redis://127.0.0.1/"
 //!
-#![doc(html_root_url = "https://docs.rs/sidekiq/0.8.0")]
+#![doc(html_root_url = "https://docs.rs/sidekiq/0.8.1")]
 #![deny(warnings)]
 #![cfg_attr(feature = "clippy", feature(plugin))]
 #![cfg_attr(feature = "clippy", plugin(clippy))]

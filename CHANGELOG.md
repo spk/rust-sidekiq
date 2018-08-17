@@ -1,4 +1,16 @@
 
+0.8.1 / 2018-08-17
+==================
+
+  * Fix fmt
+  * Fix rust fmt ci check
+  * Update rand to 0.5
+  * Clippy allow failures on travis
+  * clippy fix redundant field names in struct initialization
+  * Add Dependency status badge
+  * Update rand to 0.4
+  * Update year [ci skip]
+
 0.8.0 / 2018-01-21
 ==================
 
