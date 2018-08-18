@@ -1,4 +1,10 @@
 
+0.8.2 / 2018-08-18
+==================
+
+  * Merge pull request #3 from @jkcclemens
+    * chore: update redis and r2d2_redis
+
 0.8.1 / 2018-08-17
 ==================
 
