@@ -15,11 +15,11 @@ travis-ci = { repository = "spk/rust-sidekiq" }
 
 [dependencies]
 rand = "0.5"
-redis = "0.8"
+redis = "0.9"
 serde = "1.0"
 serde_json = "1.0"
 r2d2 = "0.8"
-r2d2_redis = "0.7"
+r2d2_redis = "0.8"
 clippy = { version = "0.0.*", optional = true }
 
 [features]
