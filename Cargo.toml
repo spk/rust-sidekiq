@@ -9,6 +9,7 @@ homepage = "https://github.com/spk/rust-sidekiq"
 keywords = ["job", "queue", "async", "sidekiq", "client"]
 license = "MIT"
 readme = "README.md"
+exclude = ["Makefile", "rustfmt.toml"]
 
 [badges]
 travis-ci = { repository = "spk/rust-sidekiq" }
@@ -20,8 +21,3 @@ serde = "1.0"
 serde_json = "1.0"
 r2d2 = "0.8"
 r2d2_redis = "0.8"
-clippy = { version = "0.0.*", optional = true }
-
-[features]
-unstable = []
-lint = ["clippy"]

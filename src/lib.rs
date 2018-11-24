@@ -8,8 +8,6 @@
 //!
 #![doc(html_root_url = "https://docs.rs/sidekiq/0.8.2")]
 #![deny(warnings)]
-#![cfg_attr(feature = "clippy", feature(plugin))]
-#![cfg_attr(feature = "clippy", plugin(clippy))]
 #![crate_name = "sidekiq"]
 
 extern crate r2d2;
