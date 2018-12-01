@@ -1,4 +1,11 @@
 
+0.8.3 / 2018-12-01
+==================
+
+  * Update rand to 0.6
+  * Remove clippy from Cargo.toml
+  * README remove experimental status badge
+
 0.8.2 / 2018-08-18
 ==================
 
