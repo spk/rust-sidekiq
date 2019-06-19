@@ -1,4 +1,12 @@
 
+0.8.4 / 2019-06-19
+==================
+
+  * README,LICENSE: bump year and fix travis badge
+  * travis: remove preview component
+  * Merge pull request #4 from @jkcclemens / master
+    * chore: update redis and r2d2_redis
+
 0.8.3 / 2018-12-01
 ==================
 
