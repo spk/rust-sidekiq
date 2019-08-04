@@ -1,5 +1,3 @@
-extern crate redis;
-
 use std::default::Default;
 use std::env;
 use std::error::Error;
@@ -8,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use r2d2::Error as PoolError;
 use r2d2::{Pool, PooledConnection};
-use r2d2_redis::RedisConnectionManager;
+use r2d2_redis::{redis, RedisConnectionManager};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;

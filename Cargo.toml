@@ -16,7 +16,6 @@ travis-ci = { repository = "spk/rust-sidekiq" }
 
 [dependencies]
 rand = "0.7"
-redis = "0.10"
 serde = "1.0"
 serde_json = "1.0"
 r2d2 = "0.8"
