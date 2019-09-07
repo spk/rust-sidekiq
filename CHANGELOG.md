@@ -1,4 +1,11 @@
 
+0.8.5 / 2019-09-07
+==================
+
+  * Update r2d2_redis and use exported r2d2 from it
+  * Use exported redis from r2d2_redis
+  * Update rand to 0.7
+
 0.8.4 / 2019-06-19
 ==================
 
