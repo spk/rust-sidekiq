@@ -11,7 +11,6 @@ matrix:
   include:
     - rust: stable
       env: FMT=1
-      install:
       before_script:
         - rustup component add rustfmt
       script:

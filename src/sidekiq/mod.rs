@@ -4,9 +4,7 @@ use std::error::Error;
 use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use r2d2::Error as PoolError;
-use r2d2::{Pool, PooledConnection};
-use r2d2_redis::{redis, RedisConnectionManager};
+use r2d2_redis::{r2d2, redis, RedisConnectionManager};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
@@ -16,8 +14,8 @@ use Value;
 
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
-pub type RedisPooledConnection = PooledConnection<RedisConnectionManager>;
-pub type RedisPool = Pool<RedisConnectionManager>;
+pub type RedisPooledConnection = r2d2::PooledConnection<RedisConnectionManager>;
+pub type RedisPool = r2d2::Pool<RedisConnectionManager>;
 
 #[derive(Debug)]
 pub struct ClientError {
@@ -27,7 +25,7 @@ pub struct ClientError {
 #[derive(Debug)]
 enum ErrorKind {
     Redis(redis::RedisError),
-    PoolInit(PoolError),
+    PoolInit(r2d2::Error),
 }
 
 pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
@@ -35,7 +33,7 @@ pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
         &env::var(&REDIS_URL_ENV.to_owned()).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
     let url = redis::parse_redis_url(redis_url).unwrap();
     let manager = RedisConnectionManager::new(url).unwrap();
-    Pool::new(manager).map_err(|err| ClientError {
+    r2d2::Pool::new(manager).map_err(|err| ClientError {
         kind: ErrorKind::PoolInit(err),
     })
 }
@@ -67,7 +65,7 @@ impl Error for ClientError {
         }
     }
 
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<&dyn Error> {
         match self.kind {
             ErrorKind::Redis(ref err) => Some(err),
             ErrorKind::PoolInit(ref err) => Some(err),
@@ -83,8 +81,8 @@ impl From<redis::RedisError> for ClientError {
     }
 }
 
-impl From<PoolError> for ClientError {
-    fn from(error: PoolError) -> ClientError {
+impl From<r2d2::Error> for ClientError {
+    fn from(error: r2d2::Error) -> ClientError {
         ClientError {
             kind: ErrorKind::PoolInit(error),
         }
@@ -235,7 +233,7 @@ impl Client {
             .map(|entry| serde_json::to_string(&entry).unwrap())
             .collect::<Vec<_>>();
         match self.connect() {
-            Ok(conn) => redis::pipe()
+            Ok(mut conn) => redis::pipe()
                 .atomic()
                 .cmd("SADD")
                 .arg("queues")
@@ -244,7 +242,7 @@ impl Client {
                 .cmd("LPUSH")
                 .arg(self.queue_name(&payload.queue))
                 .arg(to_push)
-                .query(&*conn)
+                .query(&mut *conn)
                 .map_err(|err| ClientError {
                     kind: ErrorKind::Redis(err),
                 }),
