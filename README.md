@@ -23,6 +23,7 @@ sidekiq = "0.8"
 
 ## REFERENCES
 
+* <https://github.com/jkcclemens/paste>
 * <http://julienblanchard.com/2015/using-resque-with-rust/>
 * <https://github.com/d-unseductable/rust_sidekiq>
 * <https://github.com/spk/maman>

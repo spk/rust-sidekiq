@@ -1,4 +1,10 @@
 
+0.8.6 / 2019-10-21
+==================
+
+  * Merge pull request #5 from @jkcclemens / update
+    * chore: update r2d2_redis
+
 0.8.5 / 2019-09-07
 ==================
 
