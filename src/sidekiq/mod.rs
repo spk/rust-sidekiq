@@ -151,14 +151,14 @@ impl Serialize for Job {
     where
         S: Serializer,
     {
-        let mut s = try!(serializer.serialize_struct("Job", 7));
-        try!(s.serialize_field("class", &self.class));
-        try!(s.serialize_field("args", &self.args));
-        try!(s.serialize_field("retry", &self.retry));
-        try!(s.serialize_field("queue", &self.queue));
-        try!(s.serialize_field("jid", &self.jid));
-        try!(s.serialize_field("created_at", &self.created_at));
-        try!(s.serialize_field("enqueued_at", &self.enqueued_at));
+        let mut s = serializer.serialize_struct("Job", 7)?;
+        s.serialize_field("class", &self.class)?;
+        s.serialize_field("args", &self.args)?;
+        s.serialize_field("retry", &self.retry)?;
+        s.serialize_field("queue", &self.queue)?;
+        s.serialize_field("jid", &self.jid)?;
+        s.serialize_field("created_at", &self.created_at)?;
+        s.serialize_field("enqueued_at", &self.enqueued_at)?;
         s.end()
     }
 }
