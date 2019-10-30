@@ -6,6 +6,7 @@ cache: cargo
 
 rust:
   - stable
+  - nightly
 
 matrix:
   include:
@@ -25,6 +26,10 @@ matrix:
       env: TEST=1
       script:
         - cargo test
+    - rust: nightly
+      env: BENCH=1
+      script:
+        - cargo bench
   allow_failures:
     - rust: stable
       env: CLIPPY=1
