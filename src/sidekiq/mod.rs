@@ -1,6 +1,5 @@
 use std::default::Default;
 use std::env;
-use std::error::Error;
 use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -53,22 +52,6 @@ impl fmt::Display for ClientError {
         match self.kind {
             ErrorKind::Redis(ref err) => err.fmt(f),
             ErrorKind::PoolInit(ref err) => err.fmt(f),
-        }
-    }
-}
-
-impl Error for ClientError {
-    fn description(&self) -> &str {
-        match self.kind {
-            ErrorKind::Redis(ref err) => err.description(),
-            ErrorKind::PoolInit(ref err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        match self.kind {
-            ErrorKind::Redis(ref err) => Some(err),
-            ErrorKind::PoolInit(ref err) => Some(err),
         }
     }
 }
