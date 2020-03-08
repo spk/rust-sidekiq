@@ -6,6 +6,7 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 ## Dependencies
 
+* [rand](https://github.com/rust-random/rand)
 * [redis](https://github.com/mitsuhiko/redis-rs)
 * [r2d2-redis](https://github.com/sorccu/r2d2-redis)
 * [serde_json](https://github.com/serde-rs/json)
@@ -21,18 +22,21 @@ sidekiq = "0.8"
 
 * REDIS_URL="redis://127.0.0.1/"
 
-## REFERENCES
+## Used by
 
 * <https://github.com/jkcclemens/paste>
+* <https://github.com/spk/maman>
+
+## REFERENCES
+
 * <http://julienblanchard.com/2015/using-resque-with-rust/>
 * <https://github.com/d-unseductable/rust_sidekiq>
-* <https://github.com/spk/maman>
 
 ## LICENSE
 
 The MIT License
 
-Copyright (c) 2016-2019 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2020 Laurent Arnoud <laurent@spkdev.net>
 
 ---
 [![Build](https://img.shields.io/travis/spk/rust-sidekiq/master.svg)](https://travis-ci.org/spk/rust-sidekiq)
