@@ -27,6 +27,8 @@ enum ErrorKind {
     PoolInit(r2d2::Error),
 }
 
+impl std::error::Error for ClientError {}
+
 pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
     let redis_url =
         &env::var(&REDIS_URL_ENV.to_owned()).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
