@@ -10,6 +10,7 @@ keywords = ["job", "queue", "async", "sidekiq", "client"]
 license = "MIT"
 readme = "README.md"
 exclude = ["Justfile", "rustfmt.toml"]
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "spk/rust-sidekiq" }
