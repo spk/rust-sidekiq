@@ -9,7 +9,7 @@ homepage = "https://github.com/spk/rust-sidekiq"
 keywords = ["job", "queue", "async", "sidekiq", "client"]
 license = "MIT"
 readme = "README.md"
-exclude = ["Makefile", "rustfmt.toml"]
+exclude = ["Justfile", "rustfmt.toml"]
 
 [badges]
 travis-ci = { repository = "spk/rust-sidekiq" }
