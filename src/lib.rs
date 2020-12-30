@@ -18,6 +18,6 @@ extern crate serde_json;
 
 mod sidekiq;
 pub use crate::sidekiq::{
-    create_redis_pool, Client, ClientOpts, Job, JobOpts, RedisPool, RedisPooledConnection,
+    create_redis_pool, Client, ClientError, ClientOpts, Job, JobOpts, RedisPool, RedisPooledConnection,
 };
 pub use serde_json::value::Value;
