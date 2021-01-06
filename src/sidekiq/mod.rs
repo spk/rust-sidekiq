@@ -80,10 +80,11 @@ impl Default for JobOpts {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs() as u64;
-        let jid = thread_rng()
-            .sample_iter(&Alphanumeric)
+        let mut rng = thread_rng();
+        let jid: String = (&mut rng).sample_iter(Alphanumeric)
             .take(24)
-            .collect::<String>();
+            .map(char::from)
+            .collect();
         JobOpts {
             retry: 25,
             queue: "default".to_string(),
