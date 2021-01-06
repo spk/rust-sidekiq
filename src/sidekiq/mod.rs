@@ -81,7 +81,8 @@ impl Default for JobOpts {
             .unwrap()
             .as_secs() as u64;
         let mut rng = thread_rng();
-        let jid: String = (&mut rng).sample_iter(Alphanumeric)
+        let jid: String = (&mut rng)
+            .sample_iter(Alphanumeric)
             .take(24)
             .map(char::from)
             .collect();
