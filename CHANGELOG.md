@@ -1,4 +1,20 @@
 
+0.9.0 / 2021-01-06
+==================
+
+  * Merge pull request #12 from @liaden / patch-1
+    * Make ClientError public
+  * Cargo.toml: Rust 2018
+  * Cargo.toml: Makefile => Justfile
+  * Switch Makefile to Justfile
+  * Update README [ci skip]
+  * Implement std::error::Error for ClientError
+  * Remove deprecated Error::description and Error::cause
+  * Update r2d2_redis to 0.13
+  * Rust edition 2018 fix
+  * Fix bench for simple push
+  * Use of deprecated item 'try': use the '?' operator instead
+
 0.8.6 / 2019-10-21
 ==================
 
