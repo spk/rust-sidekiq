@@ -9,7 +9,6 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use serde_json;
 
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";

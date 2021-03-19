@@ -27,7 +27,6 @@ fn get_client() -> Client {
     let ns = "test";
     let client_opts = ClientOpts {
         namespace: Some(ns.to_string()),
-        ..Default::default()
     };
     let pool = create_redis_pool().unwrap();
     Client::new(pool, client_opts)
@@ -38,11 +37,7 @@ fn time_ok(time: u64) -> bool {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs() as u64;
-    if now >= time {
-        true
-    } else {
-        false
-    }
+    now >= time
 }
 
 #[test]
@@ -60,13 +55,13 @@ fn test_job_format_with_default() {
 #[test]
 fn test_client_push() {
     let class = "MyClass".to_string();
-    let job = Job::new(class.clone(), args(), Default::default());
+    let job = Job::new(class, args(), Default::default());
     let client = get_client();
     match client.push(job) {
-        Ok(_) => assert!(true),
+        Ok(_) => {}
         Err(err) => {
             println!("Sidekiq push failed: {}", err);
-            assert!(false)
+            unreachable!()
         }
     }
 }
@@ -76,14 +71,14 @@ fn test_client_push_bulk() {
     let class = "MyClass".to_string();
     let jobs = &vec![
         Job::new(class.clone(), args(), Default::default()),
-        Job::new(class.clone(), args(), Default::default()),
+        Job::new(class, args(), Default::default()),
     ];
     let client = get_client();
     match client.push_bulk(jobs) {
-        Ok(_) => assert!(true),
+        Ok(_) => {}
         Err(err) => {
             println!("Sidekiq push failed: {}", err);
-            assert!(false)
+            unreachable!()
         }
     };
 }

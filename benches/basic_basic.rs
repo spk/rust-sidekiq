@@ -12,7 +12,6 @@ fn get_client() -> Client {
     let ns = "test";
     let client_opts = ClientOpts {
         namespace: Some(ns.to_string()),
-        ..Default::default()
     };
     let pool = create_redis_pool().unwrap();
     Client::new(pool, client_opts)
