@@ -1,4 +1,13 @@
 
+0.9.1 / 2021-04-05
+==================
+
+  * Update r2d2_redis requirement from 0.13 to 0.14
+  * Add github actions
+  * Cargo fmt
+  * Update rand to 0.8
+  * Cargo fmt
+
 0.9.0 / 2021-01-06
 ==================
 
