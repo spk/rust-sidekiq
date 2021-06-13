@@ -15,7 +15,7 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 ``` toml
 [dependencies]
-sidekiq = "0.8"
+sidekiq = "0.9"
 ```
 
 ## Default environment variables
@@ -36,10 +36,10 @@ sidekiq = "0.8"
 
 The MIT License
 
-Copyright (c) 2016-2020 Laurent Arnoud <laurent@spkdev.net>
+Copyright (c) 2016-2021 Laurent Arnoud <laurent@spkdev.net>
 
 ---
-[![Build](https://img.shields.io/travis/spk/rust-sidekiq/master.svg)](https://travis-ci.org/spk/rust-sidekiq)
+[![Build](https://img.shields.io/github/workflow/status/spk/rust-sidekiq/CI/master.svg)](https://github.com/spk/rust-sidekiq/actions)
 [![Version](https://img.shields.io/crates/v/sidekiq.svg)](https://crates.io/crates/sidekiq)
 [![Documentation](https://img.shields.io/badge/doc-rustdoc-blue.svg)](https://docs.rs/sidekiq/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT "MIT")
