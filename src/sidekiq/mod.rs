@@ -75,6 +75,14 @@ impl From<r2d2::Error> for ClientError {
     }
 }
 
+pub struct JobOpts {
+    pub retry: i64,
+    pub queue: String,
+    pub jid: String,
+    pub created_at: u64,
+    pub enqueued_at: u64,
+}
+
 impl Default for JobOpts {
     fn default() -> JobOpts {
         let now = SystemTime::now()
@@ -95,14 +103,6 @@ impl Default for JobOpts {
             enqueued_at: now,
         }
     }
-}
-
-pub struct JobOpts {
-    pub retry: i64,
-    pub queue: String,
-    pub jid: String,
-    pub created_at: u64,
-    pub enqueued_at: u64,
 }
 
 /// # Examples
@@ -151,14 +151,9 @@ impl Serialize for Job {
     }
 }
 
+#[derive(Default)]
 pub struct ClientOpts {
     pub namespace: Option<String>,
-}
-
-impl Default for ClientOpts {
-    fn default() -> ClientOpts {
-        ClientOpts { namespace: None }
-    }
 }
 
 pub struct Client {
@@ -244,7 +239,21 @@ impl Client {
             .map(|entry| serde_json::to_string(&entry).unwrap())
             .collect::<Vec<_>>();
 
-        if at.is_none() {
+        if let Some(value) = at {
+            match self.connect() {
+                Ok(mut conn) => redis::pipe()
+                    .atomic()
+                    .cmd("ZADD")
+                    .arg(self.schedule_queue_name())
+                    .arg(value)
+                    .arg(to_push)
+                    .query(&mut *conn)
+                    .map_err(|err| ClientError {
+                        kind: ErrorKind::Redis(err),
+                    }),
+                Err(err) => Err(err),
+            }
+        } else {
             match self.connect() {
                 Ok(mut conn) => redis::pipe()
                     .atomic()
@@ -261,20 +270,6 @@ impl Client {
                     }),
                 Err(err) => Err(err),
             }
-        } else {
-            match self.connect() {
-                Ok(mut conn) => redis::pipe()
-                    .atomic()
-                    .cmd("ZADD")
-                    .arg(self.schedule_queue_name())
-                    .arg(at.unwrap().to_string())
-                    .arg(to_push)
-                    .query(&mut *conn)
-                    .map_err(|err| ClientError {
-                        kind: ErrorKind::Redis(err),
-                    }),
-                Err(err) => Err(err),
-            }
         }
     }
 
@@ -282,7 +277,7 @@ impl Client {
         if let Some(ref ns) = self.namespace {
             format!("{}:schedule", ns)
         } else {
-            format!("schedule")
+            "schedule".to_string()
         }
     }
 
