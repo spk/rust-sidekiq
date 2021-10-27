@@ -27,6 +27,43 @@ sidekiq = "0.9"
 * <https://github.com/jkcclemens/paste>
 * <https://github.com/spk/maman>
 
+
+## Examples
+
+```
+use sidekiq::{Job, Value};
+use sidekiq::{Client, ClientOpts, create_redis_pool};
+use chrono::Duration;
+
+let ns = "test";
+let client_opts = ClientOpts {
+    namespace: Some(ns.to_string()),
+    ..Default::default()
+};
+let pool = create_redis_pool().unwrap();
+let client = Client::new(pool, client_opts);
+let class = "MyClass".to_string();
+
+// basic job
+let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
+match client.push(job) {
+    Ok(_) => {},
+    Err(err) => {
+        println!("Sidekiq push failed: {}", err);
+    },
+}
+
+// scheduled-jobs (perform_in)
+let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
+let interval = Duration::hours(1);
+match client.perform_in(interval, job) {
+    Ok(_) => {},
+    Err(err) => {
+        println!("Sidekiq push failed: {}", err);
+    },
+}
+```
+
 ## REFERENCES
 
 * <http://julienblanchard.com/2015/using-resque-with-rust/>

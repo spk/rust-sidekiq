@@ -10,6 +10,8 @@ use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
+use chrono::{Duration, Local};
+
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
 pub type RedisPooledConnection = r2d2::PooledConnection<RedisConnectionManager>;
@@ -204,35 +206,83 @@ impl Client {
         }
     }
 
+    fn calc_at(&self, interval: Duration) -> Option<f64> {
+        let div: f64 = 1_000_f64;
+        let maximum_interval: f64 = 1_000_000_000_f64;
+        let interval_millsec: f64 = interval.num_milliseconds() as f64 / div;
+        let now_millisec: f64 = Local::now().timestamp_millis() as f64 / div;
+
+        let start_at: f64 = if interval_millsec < maximum_interval {
+            now_millisec + interval_millsec
+        } else {
+            interval_millsec
+        };
+
+        if start_at <= now_millisec {
+            None
+        } else {
+            Some(start_at)
+        }
+    }
+
+    pub fn perform_in(&self, interval: Duration, job: Job) -> Result<(), ClientError> {
+        self.raw_push(&[job], self.calc_at(interval))
+    }
+
     pub fn push(&self, job: Job) -> Result<(), ClientError> {
-        self.raw_push(&[job])
+        self.raw_push(&[job], None)
     }
 
     pub fn push_bulk(&self, jobs: &[Job]) -> Result<(), ClientError> {
-        self.raw_push(jobs)
+        self.raw_push(jobs, None)
     }
 
-    fn raw_push(&self, payloads: &[Job]) -> Result<(), ClientError> {
+    fn raw_push(&self, payloads: &[Job], at: Option<f64>) -> Result<(), ClientError> {
         let payload = &payloads[0];
         let to_push = payloads
             .iter()
             .map(|entry| serde_json::to_string(&entry).unwrap())
             .collect::<Vec<_>>();
-        match self.connect() {
-            Ok(mut conn) => redis::pipe()
-                .atomic()
-                .cmd("SADD")
-                .arg("queues")
-                .arg(payload.queue.to_string())
-                .ignore()
-                .cmd("LPUSH")
-                .arg(self.queue_name(&payload.queue))
-                .arg(to_push)
-                .query(&mut *conn)
-                .map_err(|err| ClientError {
-                    kind: ErrorKind::Redis(err),
-                }),
-            Err(err) => Err(err),
+
+        if at.is_none() {
+            match self.connect() {
+                Ok(mut conn) => redis::pipe()
+                    .atomic()
+                    .cmd("SADD")
+                    .arg("queues")
+                    .arg(payload.queue.to_string())
+                    .ignore()
+                    .cmd("LPUSH")
+                    .arg(self.queue_name(&payload.queue))
+                    .arg(to_push)
+                    .query(&mut *conn)
+                    .map_err(|err| ClientError {
+                        kind: ErrorKind::Redis(err),
+                    }),
+                Err(err) => Err(err),
+            }
+        } else {
+            match self.connect() {
+                Ok(mut conn) => redis::pipe()
+                    .atomic()
+                    .cmd("ZADD")
+                    .arg(self.schedule_queue_name())
+                    .arg(at.unwrap().to_string())
+                    .arg(to_push)
+                    .query(&mut *conn)
+                    .map_err(|err| ClientError {
+                        kind: ErrorKind::Redis(err),
+                    }),
+                Err(err) => Err(err),
+            }
+        }
+    }
+
+    fn schedule_queue_name(&self) -> String {
+        if let Some(ref ns) = self.namespace {
+            format!("{}:schedule", ns)
+        } else {
+            format!("schedule")
         }
     }
 

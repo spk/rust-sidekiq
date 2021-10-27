@@ -8,6 +8,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::value::Value;
 use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
 
+use chrono::Duration;
+
 fn args() -> Vec<Value> {
     let value = json!({
         "code": 200,
@@ -81,4 +83,31 @@ fn test_client_push_bulk() {
             unreachable!()
         }
     };
+}
+
+#[test]
+fn test_client_perform_in() {
+    let class = "MyClass".to_string();
+    let job = Job::new(class, args(), Default::default());
+    let client = get_client();
+    let interval = Duration::hours(1);
+    match client.perform_in(interval, job) {
+        Ok(_) => {}
+        Err(err) => {
+            println!("Sidekiq push failed: {}", err);
+            unreachable!()
+        }
+    }
+
+    let class = "MyClass".to_string();
+    let job = Job::new(class, args(), Default::default());
+    let client = get_client();
+    let interval = Duration::hours(0);
+    match client.perform_in(interval, job) {
+        Ok(_) => {}
+        Err(err) => {
+            println!("Sidekiq push failed: {}", err);
+            unreachable!()
+        }
+    }
 }
