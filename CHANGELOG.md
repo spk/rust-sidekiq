@@ -1,4 +1,13 @@
 
+0.10.0 / 2021-10-27
+===================
+
+  * Merge pull request #15 from Norio4/add_perform_in
+    * Add public function perform_in() for Client
+  * Update badge and others minor updates
+  * Merge pull request #14 from spk/dependabot/add-v2-config-file
+    * Upgrade to GitHub-native Dependabot
+
 0.9.1 / 2021-04-05
 ==================
 
