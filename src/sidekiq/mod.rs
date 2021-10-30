@@ -10,7 +10,7 @@ use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
-use chrono::{Duration, Local};
+use chrono::{DateTime, Duration, Local};
 
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
@@ -201,16 +201,16 @@ impl Client {
         }
     }
 
-    fn calc_at(&self, interval: Duration) -> Option<f64> {
+    fn calc_at(&self, target_millsec_number: f64) -> Option<f64> {
         let div: f64 = 1_000_f64;
-        let maximum_interval: f64 = 1_000_000_000_f64;
-        let interval_millsec: f64 = interval.num_milliseconds() as f64 / div;
+        let maximum_target: f64 = 1_000_000_000_f64;
+        let target_millsec: f64 = target_millsec_number / div;
         let now_millisec: f64 = Local::now().timestamp_millis() as f64 / div;
 
-        let start_at: f64 = if interval_millsec < maximum_interval {
-            now_millisec + interval_millsec
+        let start_at: f64 = if target_millsec < maximum_target {
+            now_millisec + target_millsec
         } else {
-            interval_millsec
+            target_millsec
         };
 
         if start_at <= now_millisec {
@@ -220,8 +220,22 @@ impl Client {
         }
     }
 
+    fn convert_duration_to_millsec(&self, interval: Duration) -> Option<f64> {
+        let interval_millsec: f64 = interval.num_milliseconds() as f64;
+        self.calc_at(interval_millsec)
+    }
+
+    fn convert_datetime_to_millsec(&self, datetime: DateTime<Local>) -> Option<f64> {
+        let timestamp_millsec: f64 = datetime.timestamp_millis() as f64;
+        self.calc_at(timestamp_millsec)
+    }
+
     pub fn perform_in(&self, interval: Duration, job: Job) -> Result<(), ClientError> {
-        self.raw_push(&[job], self.calc_at(interval))
+        self.raw_push(&[job], self.convert_duration_to_millsec(interval))
+    }
+
+    pub fn perform_at(&self, local_datetime: DateTime<Local>, job: Job) -> Result<(), ClientError> {
+        self.raw_push(&[job], self.convert_datetime_to_millsec(local_datetime))
     }
 
     pub fn push(&self, job: Job) -> Result<(), ClientError> {
