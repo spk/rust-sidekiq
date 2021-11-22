@@ -62,6 +62,17 @@ match client.perform_in(interval, job) {
         println!("Sidekiq push failed: {}", err);
     },
 }
+
+// scheduled-jobs (perform_at)
+let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
+let now: DateTime<Local> = Local::now();
+let start_at = now + Duration::hours(1);
+match client.perform_at(start_at, job) {
+    Ok(_) => {},
+    Err(err) => {
+        println!("Sidekiq push failed: {}", err);
+    },
+}
 ```
 
 ## REFERENCES
