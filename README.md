@@ -30,7 +30,7 @@ sidekiq = "0.10"
 
 ## Examples
 
-```
+```rust
 use sidekiq::{Job, Value};
 use sidekiq::{Client, ClientOpts, create_redis_pool};
 use chrono::Duration;
