@@ -10,7 +10,7 @@ use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
-use time::{OffsetDateTime, Duration};
+use time::{Duration, OffsetDateTime};
 
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
@@ -205,7 +205,11 @@ impl Client {
         let div: f64 = 1_000_f64;
         let maximum_target: f64 = 1_000_000_000_f64;
         let target_millsec: f64 = target_millsec_number / div;
-        let now_millisec = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as f64 / div;
+        let now_millisec = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as f64
+            / div;
 
         let start_at: f64 = if target_millsec < maximum_target {
             now_millisec + target_millsec
