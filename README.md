@@ -33,7 +33,7 @@ sidekiq = "0.10"
 ```rust
 use sidekiq::{Job, Value};
 use sidekiq::{Client, ClientOpts, create_redis_pool};
-use chrono::Duration;
+use time::{OffsetDateTime, Duration};
 
 let ns = "test";
 let client_opts = ClientOpts {
@@ -65,8 +65,7 @@ match client.perform_in(interval, job) {
 
 // scheduled-jobs (perform_at)
 let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
-let now: DateTime<Local> = Local::now();
-let start_at = now + Duration::hours(1);
+let start_at = OffsetDateTime::now_utc().checked_add(Duration::HOUR).unwrap();
 match client.perform_at(start_at, job) {
     Ok(_) => {},
     Err(err) => {

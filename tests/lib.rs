@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde_json::value::Value;
 use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
 
-use chrono::{DateTime, Duration, Local};
+use time::{OffsetDateTime, Duration};
 
 fn args() -> Vec<Value> {
     let value = json!({
@@ -117,8 +117,7 @@ fn test_client_perform_at() {
     let class = "MyClass".to_string();
     let job = Job::new(class, args(), Default::default());
     let client = get_client();
-    let now: DateTime<Local> = Local::now();
-    let start_at = now + Duration::hours(1);
+    let start_at = OffsetDateTime::now_utc();
     match client.perform_at(start_at, job) {
         Ok(_) => {}
         Err(err) => {
@@ -130,9 +129,8 @@ fn test_client_perform_at() {
     let class = "MyClass".to_string();
     let job = Job::new(class, args(), Default::default());
     let client = get_client();
-    let now: DateTime<Local> = Local::now();
-    let start_datetime = now + Duration::hours(0);
-    match client.perform_at(start_datetime, job) {
+    let start_at = OffsetDateTime::now_utc().checked_add(Duration::HOUR).unwrap();
+    match client.perform_at(start_at, job) {
         Ok(_) => {}
         Err(err) => {
             println!("Sidekiq push failed: {}", err);
