@@ -1,8 +1,16 @@
 
+0.10.1 / 2021-11-22
+===================
+
+  * Merge pull request #16 from @Norio4 / add-perform_at
+    * Add public function perform_at() for Client
+  * Cargo lint fixes
+  * README: fix last version
+
 0.10.0 / 2021-10-27
 ===================
 
-  * Merge pull request #15 from Norio4/add_perform_in
+  * Merge pull request #15 from @Norio4 / add_perform_in
     * Add public function perform_in() for Client
   * Update badge and others minor updates
   * Merge pull request #14 from spk/dependabot/add-v2-config-file

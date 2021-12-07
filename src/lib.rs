@@ -6,7 +6,7 @@
 //!
 //! `REDIS_URL`="redis://127.0.0.1/"
 //!
-#![doc(html_root_url = "https://docs.rs/sidekiq/0.10.0")]
+#![doc(html_root_url = "https://docs.rs/sidekiq/0.10.1")]
 #![deny(warnings)]
 #![crate_name = "sidekiq"]
 
