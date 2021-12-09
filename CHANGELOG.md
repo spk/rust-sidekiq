@@ -1,4 +1,13 @@
 
+0.11.0 / 2021-12-09
+===================
+
+  * Finish switch to time crate
+  * Rustfmt
+  * Start to switch from chrono to time crate
+      * https://rustsec.org/advisories/RUSTSEC-2020-0159
+  * Highlight all the code
+
 0.10.1 / 2021-11-22
 ===================
 
