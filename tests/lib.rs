@@ -44,7 +44,7 @@ fn time_ok(time: u64) -> bool {
 
 #[test]
 fn test_job_format_with_default() {
-    let class = "MyClass".to_string();
+    let class = "Maman".to_string();
     let job = Job::new(class.clone(), args(), Default::default());
     assert_eq!(job.class, class);
     assert_eq!(job.retry, 25);
@@ -55,8 +55,8 @@ fn test_job_format_with_default() {
 }
 
 #[test]
-fn test_client_push() {
-    let class = "MyClass".to_string();
+fn test_client_push_single() {
+    let class = "Maman".to_string();
     let job = Job::new(class, args(), Default::default());
     let client = get_client();
     match client.push(job) {
@@ -70,7 +70,7 @@ fn test_client_push() {
 
 #[test]
 fn test_client_push_bulk() {
-    let class = "MyClass".to_string();
+    let class = "Maman".to_string();
     let jobs = &vec![
         Job::new(class.clone(), args(), Default::default()),
         Job::new(class, args(), Default::default()),
@@ -87,22 +87,10 @@ fn test_client_push_bulk() {
 
 #[test]
 fn test_client_perform_in() {
-    let class = "MyClass".to_string();
+    let class = "Maman".to_string();
     let job = Job::new(class, args(), Default::default());
     let client = get_client();
-    let interval = Duration::hours(1);
-    match client.perform_in(interval, job) {
-        Ok(_) => {}
-        Err(err) => {
-            println!("Sidekiq push failed: {}", err);
-            unreachable!()
-        }
-    }
-
-    let class = "MyClass".to_string();
-    let job = Job::new(class, args(), Default::default());
-    let client = get_client();
-    let interval = Duration::hours(0);
+    let interval = Duration::minutes(1);
     match client.perform_in(interval, job) {
         Ok(_) => {}
         Err(err) => {
@@ -114,23 +102,11 @@ fn test_client_perform_in() {
 
 #[test]
 fn test_client_perform_at() {
-    let class = "MyClass".to_string();
-    let job = Job::new(class, args(), Default::default());
-    let client = get_client();
-    let start_at = OffsetDateTime::now_utc();
-    match client.perform_at(start_at, job) {
-        Ok(_) => {}
-        Err(err) => {
-            println!("Sidekiq push failed: {}", err);
-            unreachable!()
-        }
-    }
-
-    let class = "MyClass".to_string();
+    let class = "Maman".to_string();
     let job = Job::new(class, args(), Default::default());
     let client = get_client();
     let start_at = OffsetDateTime::now_utc()
-        .checked_add(Duration::HOUR)
+        .checked_add(Duration::MINUTE)
         .unwrap();
     match client.perform_at(start_at, job) {
         Ok(_) => {}

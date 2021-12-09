@@ -113,7 +113,7 @@ impl Default for JobOpts {
 /// use sidekiq::{Job, JobOpts};
 ///
 /// // Create a job
-/// let class = "MyClass".to_string();
+/// let class = "Maman".to_string();
 /// let job_opts = JobOpts {
 ///     queue: "test".to_string(),
 ///     ..Default::default()
@@ -167,6 +167,7 @@ pub struct Client {
 ///
 /// use sidekiq::{Job, Value};
 /// use sidekiq::{Client, ClientOpts, create_redis_pool};
+/// use time::{OffsetDateTime, Duration};
 ///
 /// let ns = "test";
 /// let client_opts = ClientOpts {
@@ -175,9 +176,25 @@ pub struct Client {
 /// };
 /// let pool = create_redis_pool().unwrap();
 /// let client = Client::new(pool, client_opts);
-/// let class = "MyClass".to_string();
-/// let job = Job::new(class, vec![sidekiq::Value::Null], Default::default());
+/// let class = "Maman";
+/// let job = Job::new(class.to_string(), vec![sidekiq::Value::Null], Default::default());
 /// match client.push(job) {
+///     Ok(_) => {},
+///     Err(err) => {
+///         println!("Sidekiq push failed: {}", err);
+///     },
+/// }
+/// let job = Job::new(class.to_string(), vec![sidekiq::Value::Null], Default::default());
+/// let interval = Duration::hours(1);
+/// match client.perform_in(interval, job) {
+///     Ok(_) => {},
+///     Err(err) => {
+///         println!("Sidekiq push failed: {}", err);
+///     },
+/// }
+/// let job = Job::new(class.to_string(), vec![sidekiq::Value::Null], Default::default());
+/// let start_at = OffsetDateTime::now_utc().checked_add(Duration::HOUR).unwrap();
+/// match client.perform_at(start_at, job) {
 ///     Ok(_) => {},
 ///     Err(err) => {
 ///         println!("Sidekiq push failed: {}", err);
@@ -202,14 +219,9 @@ impl Client {
     }
 
     fn calc_at(&self, target_millsec_number: f64) -> Option<f64> {
-        let div: f64 = 1_000_f64;
         let maximum_target: f64 = 1_000_000_000_f64;
-        let target_millsec: f64 = target_millsec_number / div;
-        let now_millisec = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as f64
-            / div;
+        let target_millsec: f64 = target_millsec_number;
+        let now_millisec = OffsetDateTime::now_utc().unix_timestamp() as f64;
 
         let start_at: f64 = if target_millsec < maximum_target {
             now_millisec + target_millsec
@@ -224,22 +236,14 @@ impl Client {
         }
     }
 
-    fn convert_duration_to_millsec(&self, interval: Duration) -> Option<f64> {
-        let interval_millsec: f64 = interval.subsec_milliseconds() as f64;
-        self.calc_at(interval_millsec)
-    }
-
-    fn convert_datetime_to_millsec(&self, datetime: OffsetDateTime) -> Option<f64> {
-        let timestamp_millsec: f64 = datetime.millisecond() as f64;
-        self.calc_at(timestamp_millsec)
-    }
-
     pub fn perform_in(&self, interval: Duration, job: Job) -> Result<(), ClientError> {
-        self.raw_push(&[job], self.convert_duration_to_millsec(interval))
+        let interval: f64 = interval.whole_seconds() as f64;
+        self.raw_push(&[job], self.calc_at(interval))
     }
 
-    pub fn perform_at(&self, local_datetime: OffsetDateTime, job: Job) -> Result<(), ClientError> {
-        self.raw_push(&[job], self.convert_datetime_to_millsec(local_datetime))
+    pub fn perform_at(&self, datetime: OffsetDateTime, job: Job) -> Result<(), ClientError> {
+        let timestamp: f64 = datetime.unix_timestamp() as f64;
+        self.raw_push(&[job], self.calc_at(timestamp))
     }
 
     pub fn push(&self, job: Job) -> Result<(), ClientError> {
