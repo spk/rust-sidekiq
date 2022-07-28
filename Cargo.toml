@@ -16,9 +16,9 @@ edition = "2018"
 travis-ci = { repository = "spk/rust-sidekiq" }
 
 [dependencies]
+futures = "*"
 rand = "0.8"
 serde = "1.0"
 serde_json = "1.0"
-r2d2 = "0.8"
-r2d2_redis = "0.14"
+redis = { version = "*", features = ["connection-manager", "async-std-comp", "async-std-tls-comp"] }
 time = "0.3"
