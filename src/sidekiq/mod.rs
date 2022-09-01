@@ -36,8 +36,7 @@ pub fn create_redis_pool() -> Result<ConnectionManager, ClientError> {
 }
 
 pub async fn create_async_redis_pool() -> Result<ConnectionManager, ClientError> {
-    let redis_url =
-        &env::var(&REDIS_URL_ENV.to_owned()).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
+    let redis_url = &env::var(REDIS_URL_ENV).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
     // Note: this connection is multiplexed. Users of this object will call clone(), but the same underlying connection will be used.
     // https://docs.rs/redis/latest/redis/aio/struct.ConnectionManager.html
     match ConnectionManager::new(redis::Client::open((*redis_url).clone()).unwrap()).await {
