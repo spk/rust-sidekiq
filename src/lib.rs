@@ -10,15 +10,13 @@
 #![deny(warnings)]
 #![crate_name = "sidekiq"]
 
-extern crate r2d2;
-extern crate r2d2_redis;
 extern crate rand;
 extern crate serde;
 extern crate serde_json;
 
 mod sidekiq;
 pub use crate::sidekiq::{
-    create_redis_pool, Client, ClientError, ClientOpts, Job, JobOpts, RedisPool,
-    RedisPooledConnection,
+    create_async_redis_pool, create_redis_pool, Client, ClientError, ClientOpts, Job, JobOpts,
+    RedisPool,
 };
 pub use serde_json::value::Value;

@@ -4,7 +4,6 @@ use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::Value;
-use r2d2_redis::{r2d2, redis, RedisConnectionManager};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::ser::SerializeStruct;
@@ -12,10 +11,13 @@ use serde::{Serialize, Serializer};
 
 use time::{Duration, OffsetDateTime};
 
+use futures::executor::block_on;
+use futures::future::TryFutureExt;
+use redis::aio::ConnectionManager;
+
 const REDIS_URL_ENV: &str = "REDIS_URL";
 const REDIS_URL_DEFAULT: &str = "redis://127.0.0.1/";
-pub type RedisPooledConnection = r2d2::PooledConnection<RedisConnectionManager>;
-pub type RedisPool = r2d2::Pool<RedisConnectionManager>;
+pub type RedisPool = ConnectionManager;
 
 #[derive(Debug)]
 pub struct ClientError {
@@ -25,19 +27,25 @@ pub struct ClientError {
 #[derive(Debug)]
 enum ErrorKind {
     Redis(redis::RedisError),
-    PoolInit(r2d2::Error),
 }
 
 impl std::error::Error for ClientError {}
 
-pub fn create_redis_pool() -> Result<RedisPool, ClientError> {
+pub fn create_redis_pool() -> Result<ConnectionManager, ClientError> {
+    block_on(create_async_redis_pool())
+}
+
+pub async fn create_async_redis_pool() -> Result<ConnectionManager, ClientError> {
     let redis_url =
         &env::var(&REDIS_URL_ENV.to_owned()).unwrap_or_else(|_| REDIS_URL_DEFAULT.to_owned());
-    let url = redis::parse_redis_url(redis_url).unwrap();
-    let manager = RedisConnectionManager::new(url).unwrap();
-    r2d2::Pool::new(manager).map_err(|err| ClientError {
-        kind: ErrorKind::PoolInit(err),
-    })
+    // Note: this connection is multiplexed. Users of this object will call clone(), but the same underlying connection will be used.
+    // https://docs.rs/redis/latest/redis/aio/struct.ConnectionManager.html
+    match ConnectionManager::new(redis::Client::open((*redis_url).clone()).unwrap()).await {
+        Ok(pool) => Ok(pool),
+        Err(err) => Err(ClientError {
+            kind: ErrorKind::Redis(err),
+        }),
+    }
 }
 
 pub struct Job {
@@ -54,7 +62,6 @@ impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.kind {
             ErrorKind::Redis(ref err) => err.fmt(f),
-            ErrorKind::PoolInit(ref err) => err.fmt(f),
         }
     }
 }
@@ -63,14 +70,6 @@ impl From<redis::RedisError> for ClientError {
     fn from(error: redis::RedisError) -> ClientError {
         ClientError {
             kind: ErrorKind::Redis(error),
-        }
-    }
-}
-
-impl From<r2d2::Error> for ClientError {
-    fn from(error: r2d2::Error) -> ClientError {
-        ClientError {
-            kind: ErrorKind::PoolInit(error),
         }
     }
 }
@@ -157,7 +156,7 @@ pub struct ClientOpts {
 }
 
 pub struct Client {
-    pub redis_pool: RedisPool,
+    pub redis_pool: ConnectionManager,
     pub namespace: Option<String>,
 }
 
@@ -202,19 +201,10 @@ pub struct Client {
 /// }
 /// ```
 impl Client {
-    pub fn new(redis_pool: RedisPool, opts: ClientOpts) -> Client {
+    pub fn new(redis_pool: ConnectionManager, opts: ClientOpts) -> Client {
         Client {
             redis_pool,
             namespace: opts.namespace,
-        }
-    }
-
-    fn connect(&self) -> Result<RedisPooledConnection, ClientError> {
-        match self.redis_pool.get() {
-            Ok(conn) => Ok(conn),
-            Err(err) => Err(ClientError {
-                kind: ErrorKind::PoolInit(err),
-            }),
         }
     }
 
@@ -237,24 +227,44 @@ impl Client {
     }
 
     pub fn perform_in(&self, interval: Duration, job: Job) -> Result<(), ClientError> {
-        let interval: f64 = interval.whole_seconds() as f64;
-        self.raw_push(&[job], self.calc_at(interval))
+        block_on(self.perform_in_async(interval, job))
     }
 
     pub fn perform_at(&self, datetime: OffsetDateTime, job: Job) -> Result<(), ClientError> {
-        let timestamp: f64 = datetime.unix_timestamp() as f64;
-        self.raw_push(&[job], self.calc_at(timestamp))
+        block_on(self.perform_at_async(datetime, job))
     }
 
     pub fn push(&self, job: Job) -> Result<(), ClientError> {
-        self.raw_push(&[job], None)
+        block_on(self.push_async(job))
     }
 
     pub fn push_bulk(&self, jobs: &[Job]) -> Result<(), ClientError> {
-        self.raw_push(jobs, None)
+        block_on(self.push_bulk_async(jobs))
     }
 
-    fn raw_push(&self, payloads: &[Job], at: Option<f64>) -> Result<(), ClientError> {
+    pub async fn perform_in_async(&self, interval: Duration, job: Job) -> Result<(), ClientError> {
+        let interval: f64 = interval.whole_seconds() as f64;
+        self.raw_push(&[job], self.calc_at(interval)).await
+    }
+
+    pub async fn perform_at_async(
+        &self,
+        datetime: OffsetDateTime,
+        job: Job,
+    ) -> Result<(), ClientError> {
+        let timestamp: f64 = datetime.unix_timestamp() as f64;
+        self.raw_push(&[job], self.calc_at(timestamp)).await
+    }
+
+    pub async fn push_async(&self, job: Job) -> Result<(), ClientError> {
+        self.raw_push(&[job], None).await
+    }
+
+    pub async fn push_bulk_async(&self, jobs: &[Job]) -> Result<(), ClientError> {
+        self.raw_push(jobs, None).await
+    }
+
+    async fn raw_push(&self, payloads: &[Job], at: Option<f64>) -> Result<(), ClientError> {
         let payload = &payloads[0];
         let to_push = payloads
             .iter()
@@ -262,36 +272,32 @@ impl Client {
             .collect::<Vec<_>>();
 
         if let Some(value) = at {
-            match self.connect() {
-                Ok(mut conn) => redis::pipe()
-                    .atomic()
-                    .cmd("ZADD")
-                    .arg(self.schedule_queue_name())
-                    .arg(value)
-                    .arg(to_push)
-                    .query(&mut *conn)
-                    .map_err(|err| ClientError {
-                        kind: ErrorKind::Redis(err),
-                    }),
-                Err(err) => Err(err),
-            }
+            redis::pipe()
+                .atomic()
+                .cmd("ZADD")
+                .arg(self.schedule_queue_name())
+                .arg(value)
+                .arg(to_push)
+                .query_async(&mut self.redis_pool.clone())
+                .map_err(|err| ClientError {
+                    kind: ErrorKind::Redis(err),
+                })
+                .await
         } else {
-            match self.connect() {
-                Ok(mut conn) => redis::pipe()
-                    .atomic()
-                    .cmd("SADD")
-                    .arg("queues")
-                    .arg(payload.queue.to_string())
-                    .ignore()
-                    .cmd("LPUSH")
-                    .arg(self.queue_name(&payload.queue))
-                    .arg(to_push)
-                    .query(&mut *conn)
-                    .map_err(|err| ClientError {
-                        kind: ErrorKind::Redis(err),
-                    }),
-                Err(err) => Err(err),
-            }
+            redis::pipe()
+                .atomic()
+                .cmd("SADD")
+                .arg("queues")
+                .arg(payload.queue.to_string())
+                .ignore()
+                .cmd("LPUSH")
+                .arg(self.queue_name(&payload.queue))
+                .arg(to_push)
+                .query_async(&mut self.redis_pool.clone())
+                .map_err(|err| ClientError {
+                    kind: ErrorKind::Redis(err),
+                })
+                .await
         }
     }
 
