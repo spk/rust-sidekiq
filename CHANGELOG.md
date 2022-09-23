@@ -1,4 +1,12 @@
 
+0.12.0 / 2022-09-23
+===================
+
+  * Clippy fixes
+  * Merge pull request #18 from @pganalyze / connection-manager
+    * Add async methods for callers that run inside an async executor
+    * Replace use of r2d2 with redis-rs ConnectionManager
+
 0.11.0 / 2021-12-09
 ===================
 
