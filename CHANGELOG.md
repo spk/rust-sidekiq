@@ -2,6 +2,7 @@
 0.12.0 / 2022-09-23
 ===================
 
+  * Wildcard dependency constraints are not allowed
   * Clippy fixes
   * Merge pull request #18 from @pganalyze / connection-manager
     * Add async methods for callers that run inside an async executor
