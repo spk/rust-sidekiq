@@ -86,7 +86,7 @@ impl Default for JobOpts {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs() as u64;
+            .as_secs();
         let mut rng = thread_rng();
         let jid: String = (&mut rng)
             .sample_iter(Alphanumeric)
