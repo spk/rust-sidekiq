@@ -8,7 +8,6 @@ format](https://github.com/mperham/sidekiq/wiki/Job-Format) as reference.
 
 * [rand](https://github.com/rust-random/rand)
 * [redis](https://github.com/mitsuhiko/redis-rs)
-* [r2d2-redis](https://github.com/sorccu/r2d2-redis)
 * [serde_json](https://github.com/serde-rs/json)
 
 ## Installation
