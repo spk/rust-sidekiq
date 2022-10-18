@@ -38,7 +38,7 @@ fn time_ok(time: u64) -> bool {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
-        .as_secs() as u64;
+        .as_secs();
     now >= time
 }
 
