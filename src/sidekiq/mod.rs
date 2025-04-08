@@ -4,8 +4,8 @@ use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::Value;
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::distr::Alphanumeric;
+use rand::{rng, Rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
@@ -87,7 +87,7 @@ impl Default for JobOpts {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let jid: String = (&mut rng)
             .sample_iter(Alphanumeric)
             .take(24)
