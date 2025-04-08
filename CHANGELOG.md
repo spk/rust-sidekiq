@@ -1,4 +1,18 @@
 
+0.13.0 / 2025-04-08
+===================
+
+  * fix: update to rand-0.9
+  * Update rand requirement from 0.8 to 0.9
+  * Update redis requirement from 0.27 to 0.29
+  * Update redis requirement from 0.26 to 0.27
+  * Update redis requirement from 0.25 to 0.26
+  * Update redis requirement from 0.23 to 0.25
+  * Update redis requirement from 0.22 to 0.23
+  * Update redis requirement from 0.21 to 0.22
+  * Fix lint casting to the same type is unnecessary
+  * README remove r2d2-redis
+
 0.12.0 / 2022-09-23
 ===================
 
