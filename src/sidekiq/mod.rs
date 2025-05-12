@@ -302,7 +302,7 @@ impl Client {
 
     fn schedule_queue_name(&self) -> String {
         if let Some(ref ns) = self.namespace {
-            format!("{}:schedule", ns)
+            format!("{ns}:schedule")
         } else {
             "schedule".to_string()
         }
@@ -310,9 +310,9 @@ impl Client {
 
     fn queue_name(&self, queue: &str) -> String {
         if let Some(ref ns) = self.namespace {
-            format!("{}:queue:{}", ns, queue)
+            format!("{ns}:queue:{queue}")
         } else {
-            format!("queue:{}", queue)
+            format!("queue:{queue}")
         }
     }
 }

@@ -62,7 +62,7 @@ fn test_client_push_single() {
     match client.push(job) {
         Ok(_) => {}
         Err(err) => {
-            println!("Sidekiq push failed: {}", err);
+            println!("Sidekiq push failed: {err}");
             unreachable!()
         }
     }
@@ -79,7 +79,7 @@ fn test_client_push_bulk() {
     match client.push_bulk(jobs) {
         Ok(_) => {}
         Err(err) => {
-            println!("Sidekiq push failed: {}", err);
+            println!("Sidekiq push failed: {err}");
             unreachable!()
         }
     };
@@ -94,7 +94,7 @@ fn test_client_perform_in() {
     match client.perform_in(interval, job) {
         Ok(_) => {}
         Err(err) => {
-            println!("Sidekiq push failed: {}", err);
+            println!("Sidekiq push failed: {err}");
             unreachable!()
         }
     }
@@ -111,7 +111,7 @@ fn test_client_perform_at() {
     match client.perform_at(start_at, job) {
         Ok(_) => {}
         Err(err) => {
-            println!("Sidekiq push failed: {}", err);
+            println!("Sidekiq push failed: {err}");
             unreachable!()
         }
     }
