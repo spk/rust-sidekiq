@@ -5,7 +5,7 @@ extern crate serde_json;
 extern crate sidekiq;
 
 use serde_json::value::Value;
-use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
+use sidekiq::{Client, ClientOpts, Job, create_redis_pool};
 use test::Bencher;
 
 fn get_client() -> Client {

@@ -6,7 +6,7 @@ use std::default::Default;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::value::Value;
-use sidekiq::{create_redis_pool, Client, ClientOpts, Job};
+use sidekiq::{Client, ClientOpts, Job, create_redis_pool};
 
 use time::{Duration, OffsetDateTime};
 
@@ -71,7 +71,7 @@ fn test_client_push_single() {
 #[test]
 fn test_client_push_bulk() {
     let class = "Maman".to_string();
-    let jobs = &vec![
+    let jobs = &[
         Job::new(class.clone(), args(), Default::default()),
         Job::new(class, args(), Default::default()),
     ];
