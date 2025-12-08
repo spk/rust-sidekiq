@@ -1,4 +1,13 @@
 
+0.14.0 / 2025-12-08
+===================
+
+  * fix: deprecated feature removal
+  * Update redis requirement from 0.32 to 1.0
+  * Update redis requirement from 0.31 to 0.32
+  * Update redis requirement from 0.30 to 0.31
+  * Update redis requirement from 0.29 to 0.30
+
 0.13.0 / 2025-04-08
 ===================
 
