@@ -16,4 +16,4 @@ all: build test
     cargo fmt --all -- --check
 
 @lint:
-    cargo clippy -- -D warnings
+    cargo clippy --all-features -- -D warnings
