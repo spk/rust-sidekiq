@@ -137,7 +137,7 @@ jobs:
       - name: Start Redis
         uses: supercharge/redis-github-action@1.2.0
         with:
-          redis-version: 6
+          redis-version: 8
 
       - name: Run all tests
         uses: actions-rs/cargo@v1
