@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::Value;
 use rand::distr::Alphanumeric;
-use rand::{Rng, rng};
+use rand::{RngExt, rng};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
